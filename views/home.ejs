@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title><%= pageTitle %></title>
+
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+
+<body>
+
+    <header>
+        <h1>The Web Daily</h1>
+
+        <nav>
+            <a href="/">Home</a>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <h2>Latest News</h2>
+
+            <% if (articles.length === 0) { %>
+
+                <p>No published articles are available.</p>
+
+            <% } else { %>
+
+                <div class="news-feed">
+
+                    <% articles.forEach(article => { %>
+
+                        <article class="news-card">
+
+                            <p>
+                                <strong>
+                                    <%= article.publishedVersion.category %>
+                                </strong>
+                            </p>
+
+                            <h3>
+                                <%= article.publishedVersion.title %>
+                            </h3>
+
+                            <p>
+                                <%= article.publishedVersion.summary %>
+                            </p>
+
+                            <p>
+                                By <%= article.author.displayName %>
+                            </p>
+
+                            <p>
+                                Views: <%= article.totalViews %>
+                            </p>
+
+                        </article>
+
+                    <% }) %>
+
+                </div>
+
+            <% } %>
+
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 The Web Daily</p>
+    </footer>
+
+</body>
+
+</html>
