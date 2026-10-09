@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title><%= pageTitle %> | The Web Daily</title>
+    <title><%= pageTitle %></title>
 
     <link
         rel="stylesheet"
@@ -20,16 +20,26 @@
 <body>
 
     <header>
-        <h1>The Web Daily</h1>
+        <h1>
+            The Web Daily
+        </h1>
 
         <nav>
-            <a href="/">Public Site</a>
+            <a href="/">
+                Public Site
+            </a>
+
+            <a href="/editor/analytics">
+                Analytics Impact
+            </a>
         </nav>
     </header>
 
     <main>
 
-        <h2>Editor Dashboard</h2>
+        <h2>
+            Editor Dashboard
+        </h2>
 
         <p>
             Welcome,
@@ -42,97 +52,104 @@
             method="GET"
             action="/editor"
         >
-            <label>
+
+            <label for="status">
                 Filter by status
-
-                <select name="status">
-
-                    <option
-                        value=""
-                        <%= selectedStatus === "" ? "selected" : "" %>
-                    >
-                        All
-                    </option>
-
-                    <option
-                        value="pending"
-                        <%= selectedStatus === "pending" ? "selected" : "" %>
-                    >
-                        Pending
-                    </option>
-
-                    <option
-                        value="published"
-                        <%= selectedStatus === "published" ? "selected" : "" %>
-                    >
-                        Published
-                    </option>
-
-                    <option
-                        value="returned"
-                        <%= selectedStatus === "returned" ? "selected" : "" %>
-                    >
-                        Returned
-                    </option>
-
-                    <option
-                        value="draft"
-                        <%= selectedStatus === "draft" ? "selected" : "" %>
-                    >
-                        Draft
-                    </option>
-
-                </select>
             </label>
+
+            <select
+                id="status"
+                name="status"
+            >
+
+                <option
+                    value=""
+                    <%= !selectedStatus ? "selected" : "" %>
+                >
+                    All
+                </option>
+
+                <option
+                    value="draft"
+                    <%= selectedStatus === "draft" ? "selected" : "" %>
+                >
+                    Draft
+                </option>
+
+                <option
+                    value="pending"
+                    <%= selectedStatus === "pending" ? "selected" : "" %>
+                >
+                    Pending
+                </option>
+
+                <option
+                    value="published"
+                    <%= selectedStatus === "published" ? "selected" : "" %>
+                >
+                    Published
+                </option>
+
+                <option
+                    value="returned"
+                    <%= selectedStatus === "returned" ? "selected" : "" %>
+                >
+                    Returned
+                </option>
+
+            </select>
 
             <button type="submit">
                 Filter
             </button>
+
         </form>
 
-        <section>
+        <h2>
+            Articles
+        </h2>
 
-            <h2>Articles</h2>
+        <% if (articles.length === 0) { %>
 
-            <% if (articles.length === 0) { %>
+            <p>
+                No articles found.
+            </p>
 
-                <p>No articles found.</p>
+        <% } %>
 
-            <% } else { %>
+        <% articles.forEach(article => { %>
 
-                <% articles.forEach(article => { %>
+            <article>
 
-                    <article class="news-card">
+                <h3>
+                    <%= article.workingVersion.title || "Untitled Article" %>
+                </h3>
 
-                        <h3>
-                            <%= article.workingVersion.title || "Untitled Article" %>
-                        </h3>
+                <p>
+                    Reporter:
+                    <%= article.author.displayName %>
+                </p>
 
-                        <p>
-                            Reporter:
-                            <%= article.author.displayName %>
-                        </p>
+                <p>
+                    Status:
+                    <strong>
+                        <%= article.status %>
+                    </strong>
+                </p>
 
-                        <p>
-                            Status:
-                            <strong>
-                                <%= article.status %>
-                            </strong>
-                        </p>
+                <p>
+                    <a
+                        href="/editor/articles/<%= article._id %>"
+                    >
+                        Review Article
+                    </a>
+                </p>
 
-                        <a
-                            href="/editor/articles/<%= article._id %>"
-                        >
-                            Review Article
-                        </a>
+            </article>
 
-                    </article>
+            <hr>
 
-                <% }) %>
-
-            <% } %>
-
-        </section>
+        <% }) %>
 
         <form
             method="POST"

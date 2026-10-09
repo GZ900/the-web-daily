@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title><%= pageTitle %></title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/chart.js"
+        defer
+    ></script>
+
+    <script
+        src="/js/analytics.js"
+        defer
+    ></script>
+</head>
+
+<body>
+
+    <header>
+
+        <h1>
+            The Web Daily
+        </h1>
+
+        <nav>
+
+            <a href="/">
+                Public Site
+            </a>
+
+            <a href="/editor">
+                Editor Dashboard
+            </a>
+
+        </nav>
+
+    </header>
+
+    <main>
+
+        <h2>
+            Analytics Impact
+        </h2>
+
+        <% if (articles.length === 0) { %>
+
+            <p>
+                No published articles
+                are available.
+            </p>
+
+        <% } else { %>
+
+            <section>
+
+                <label
+                    for="analytics-article"
+                >
+                    Article
+                </label>
+
+                <select
+                    id="analytics-article"
+                >
+
+                    <% articles.forEach(article => { %>
+
+                        <option
+                            value="<%= article._id %>"
+                        >
+                            <%= article.publishedVersion.title %>
+                            —
+                            <%= article.author.displayName %>
+                        </option>
+
+                    <% }) %>
+
+                </select>
+
+                <label
+                    for="analytics-range"
+                >
+                    Time range
+                </label>
+
+                <select
+                    id="analytics-range"
+                >
+
+                    <option value="30m">
+                        Last 30 minutes
+                    </option>
+
+                    <option value="1h">
+                        Last hour
+                    </option>
+
+                    <option value="3h">
+                        Last 3 hours
+                    </option>
+
+                    <option value="6h">
+                        Last 6 hours
+                    </option>
+
+                    <option value="12h">
+                        Last 12 hours
+                    </option>
+
+                    <option value="24h">
+                        Last 24 hours
+                    </option>
+
+                    <option
+                        value="7d"
+                        selected
+                    >
+                        Last 7 days
+                    </option>
+
+                    <option value="30d">
+                        Last 30 days
+                    </option>
+
+                    <option value="90d">
+                        Last 90 days
+                    </option>
+
+                    <option value="custom">
+                        Custom range
+                    </option>
+
+                </select>
+
+            </section>
+
+            <section
+                id="custom-range-controls"
+                hidden
+            >
+
+                <h3>
+                    Custom Time Range
+                </h3>
+
+                <label
+                    for="analytics-start"
+                >
+                    From
+                </label>
+
+                <input
+                    type="datetime-local"
+                    id="analytics-start"
+                >
+
+                <label
+                    for="analytics-end"
+                >
+                    To
+                </label>
+
+                <input
+                    type="datetime-local"
+                    id="analytics-end"
+                >
+
+                <button
+                    type="button"
+                    id="apply-custom-range"
+                >
+                    Apply
+                </button>
+
+                <p>
+                    Custom ranges can cover
+                    up to 90 days.
+                </p>
+
+            </section>
+
+            <section>
+
+                <h3
+                    id="analytics-title"
+                >
+                    Loading analytics...
+                </h3>
+
+                <p>
+                    Total article views
+                    (all time):
+
+                    <strong
+                        id="analytics-total-views"
+                    >
+                        -
+                    </strong>
+                </p>
+
+                <p>
+                    Dates and times are shown
+                    in your local time using
+                    English 24-hour format.
+                </p>
+
+                <p
+                    id="analytics-message"
+                    aria-live="polite"
+                ></p>
+
+                <div
+                    style="
+                        position: relative;
+                        width: 100%;
+                        max-width: 1100px;
+                        height: 500px;
+                    "
+                >
+
+                    <canvas
+                        id="analytics-chart"
+                    ></canvas>
+
+                </div>
+
+            </section>
+
+            <section>
+
+                <h3>
+                    Publication Events
+                </h3>
+
+                <div
+                    id="publication-events"
+                ></div>
+
+            </section>
+
+        <% } %>
+
+    </main>
+
+</body>
+
+</html>

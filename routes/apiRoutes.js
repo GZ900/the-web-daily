@@ -1,4 +1,5 @@
-const express = require("express");
+const express =
+  require("express");
 
 const {
   createComment
@@ -26,6 +27,12 @@ const {
   getFeedArticles
 } = require(
   "../controllers/feedController"
+);
+
+const {
+  getArticleAnalytics
+} = require(
+  "../controllers/analyticsController"
 );
 
 const {
@@ -82,6 +89,12 @@ router.delete(
   "/editor/articles/:id",
   requireEditor,
   deleteArticle
+);
+
+router.get(
+  "/editor/articles/:id/analytics",
+  requireEditor,
+  getArticleAnalytics
 );
 
 module.exports = router;

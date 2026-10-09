@@ -1,71 +1,126 @@
-const Article = require("../models/Article");
-const Comment = require("../models/Comment");
-const ViewStat = require("../models/ViewStat");
+const Article =
+  require("../models/Article");
+
+const Comment =
+  require("../models/Comment");
+
+const ViewStat =
+  require("../models/ViewStat");
 
 require("../models/User");
 
-function getHourBucket(date) {
-  const bucket = new Date(date);
+function getFiveMinuteBucket() {
+  const bucket =
+    new Date();
 
-  bucket.setMinutes(0, 0, 0);
+  const roundedMinutes =
+    Math.floor(
+      bucket.getUTCMinutes() / 5
+    ) * 5;
+
+  bucket.setUTCMinutes(
+    roundedMinutes,
+    0,
+    0
+  );
 
   return bucket;
 }
 
 async function getArticle(req, res) {
   try {
-    const article = await Article.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        publishedVersion: { $ne: null }
-      },
-      {
-        $inc: {
-          totalViews: 1
+    const article =
+      await Article.findOneAndUpdate(
+        {
+          _id: req.params.id,
+
+          publishedVersion: {
+            $ne: null
+          }
+        },
+        {
+          $inc: {
+            totalViews: 1
+          }
+        },
+        {
+          new: true
         }
-      },
-      {
-        new: true
-      }
-    ).populate("author", "displayName");
+      )
+        .populate(
+          "author",
+          "displayName"
+        )
+        .lean();
 
     if (!article) {
-      return res.status(404).send("Article not found");
+      return res
+        .status(404)
+        .send(
+          "Article not found"
+        );
     }
 
-    const bucketStart = getHourBucket(new Date());
+    const bucketStart =
+      getFiveMinuteBucket();
 
-    await ViewStat.findOneAndUpdate(
-      {
-        article: article._id,
-        bucketStart
-      },
-      {
-        $inc: {
-          views: 1
+    try {
+      await ViewStat.updateOne(
+        {
+          article:
+            article._id,
+
+          bucketStart
+        },
+        {
+          $inc: {
+            views: 1
+          }
+        },
+        {
+          upsert: true
         }
-      },
+      );
+    } catch (viewError) {
+      console.error(
+        "View statistics error:",
+        viewError
+      );
+    }
+
+    const comments =
+      await Comment.find({
+        article:
+          article._id
+      })
+        .sort({
+          createdAt: -1
+        })
+        .lean();
+
+    res.render(
+      "article",
       {
-        upsert: true,
-        new: true
+        pageTitle:
+          article
+            .publishedVersion
+            .title,
+
+        article,
+        comments
       }
     );
-
-    const comments = await Comment.find({
-      article: article._id
-    }).sort({
-      createdAt: -1
-    });
-
-    res.render("article", {
-      pageTitle: article.publishedVersion.title,
-      article,
-      comments
-    });
   } catch (error) {
-    console.error("Article page error:", error);
+    console.error(
+      "Article page error:",
+      error
+    );
 
-    res.status(500).send("Internal Server Error");
+    res
+      .status(500)
+      .send(
+        "Internal Server Error"
+      );
   }
 }
 

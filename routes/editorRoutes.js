@@ -1,19 +1,41 @@
-const express = require("express");
-
-const {
-  requireEditor
-} = require("../middleware/auth");
+const express =
+  require("express");
 
 const {
   getDashboard,
   getReviewArticle
-} = require("../controllers/editorController");
+} = require(
+  "../controllers/editorController"
+);
 
-const router = express.Router();
+const {
+  getAnalyticsPage
+} = require(
+  "../controllers/analyticsController"
+);
 
-router.use(requireEditor);
+const {
+  requireEditor
+} = require(
+  "../middleware/auth"
+);
 
-router.get("/", getDashboard);
+const router =
+  express.Router();
+
+router.use(
+  requireEditor
+);
+
+router.get(
+  "/",
+  getDashboard
+);
+
+router.get(
+  "/analytics",
+  getAnalyticsPage
+);
 
 router.get(
   "/articles/:id",
