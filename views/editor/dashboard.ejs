@@ -38,11 +38,106 @@
             </strong>
         </p>
 
-        <p>
-            Editor workspace is ready.
-        </p>
+        <form
+            method="GET"
+            action="/editor"
+        >
+            <label>
+                Filter by status
 
-        <form method="POST" action="/logout">
+                <select name="status">
+
+                    <option
+                        value=""
+                        <%= selectedStatus === "" ? "selected" : "" %>
+                    >
+                        All
+                    </option>
+
+                    <option
+                        value="pending"
+                        <%= selectedStatus === "pending" ? "selected" : "" %>
+                    >
+                        Pending
+                    </option>
+
+                    <option
+                        value="published"
+                        <%= selectedStatus === "published" ? "selected" : "" %>
+                    >
+                        Published
+                    </option>
+
+                    <option
+                        value="returned"
+                        <%= selectedStatus === "returned" ? "selected" : "" %>
+                    >
+                        Returned
+                    </option>
+
+                    <option
+                        value="draft"
+                        <%= selectedStatus === "draft" ? "selected" : "" %>
+                    >
+                        Draft
+                    </option>
+
+                </select>
+            </label>
+
+            <button type="submit">
+                Filter
+            </button>
+        </form>
+
+        <section>
+
+            <h2>Articles</h2>
+
+            <% if (articles.length === 0) { %>
+
+                <p>No articles found.</p>
+
+            <% } else { %>
+
+                <% articles.forEach(article => { %>
+
+                    <article class="news-card">
+
+                        <h3>
+                            <%= article.workingVersion.title || "Untitled Article" %>
+                        </h3>
+
+                        <p>
+                            Reporter:
+                            <%= article.author.displayName %>
+                        </p>
+
+                        <p>
+                            Status:
+                            <strong>
+                                <%= article.status %>
+                            </strong>
+                        </p>
+
+                        <a
+                            href="/editor/articles/<%= article._id %>"
+                        >
+                            Review Article
+                        </a>
+
+                    </article>
+
+                <% }) %>
+
+            <% } %>
+
+        </section>
+
+        <form
+            method="POST"
+            action="/logout"
+        >
             <button type="submit">
                 Logout
             </button>

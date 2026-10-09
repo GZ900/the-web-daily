@@ -4,16 +4,20 @@ const {
   requireEditor
 } = require("../middleware/auth");
 
+const {
+  getDashboard,
+  getReviewArticle
+} = require("../controllers/editorController");
+
 const router = express.Router();
 
+router.use(requireEditor);
+
+router.get("/", getDashboard);
+
 router.get(
-  "/",
-  requireEditor,
-  (req, res) => {
-    res.render("editor/dashboard", {
-      pageTitle: "Editor Dashboard"
-    });
-  }
+  "/articles/:id",
+  getReviewArticle
 );
 
 module.exports = router;

@@ -10,7 +10,15 @@ const {
 } = require("../controllers/reporterController");
 
 const {
-  requireReporter
+  updateArticle,
+  approveArticle,
+  returnArticle,
+  deleteArticle
+} = require("../controllers/editorController");
+
+const {
+  requireReporter,
+  requireEditor
 } = require("../middleware/auth");
 
 const router = express.Router();
@@ -30,6 +38,30 @@ router.patch(
   "/reporter/articles/:id/status",
   requireReporter,
   submitArticle
+);
+
+router.patch(
+  "/editor/articles/:id",
+  requireEditor,
+  updateArticle
+);
+
+router.patch(
+  "/editor/articles/:id/approve",
+  requireEditor,
+  approveArticle
+);
+
+router.patch(
+  "/editor/articles/:id/return",
+  requireEditor,
+  returnArticle
+);
+
+router.delete(
+  "/editor/articles/:id",
+  requireEditor,
+  deleteArticle
 );
 
 module.exports = router;

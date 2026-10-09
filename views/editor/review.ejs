@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title><%= pageTitle %> | The Web Daily</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+    <script
+        src="/js/editorReview.js"
+        defer
+    ></script>
+</head>
+
+<body>
+
+    <header>
+        <h1>The Web Daily</h1>
+
+        <nav>
+            <a href="/editor">
+                Editor Dashboard
+            </a>
+        </nav>
+    </header>
+
+    <main>
+
+        <section
+            id="editor-review"
+            data-article-id="<%= article._id %>"
+            data-status="<%= article.status %>"
+        >
+
+            <h2>Review Article</h2>
+
+            <p>
+                Reporter:
+                <strong>
+                    <%= article.author.displayName %>
+                </strong>
+            </p>
+
+            <p>
+                Status:
+                <strong>
+                    <%= article.status %>
+                </strong>
+            </p>
+
+            <% if (article.publishedVersion) { %>
+
+                <section>
+
+                    <h2>Currently Published Version</h2>
+
+                    <h3>
+                        <%= article.publishedVersion.title %>
+                    </h3>
+
+                    <p>
+                        <%= article.publishedVersion.summary %>
+                    </p>
+
+                    <p>
+                        Category:
+                        <%= article.publishedVersion.category %>
+                    </p>
+
+                    <div>
+                        <%= article.publishedVersion.content %>
+                    </div>
+
+                </section>
+
+                <hr>
+
+            <% } %>
+
+            <section>
+
+                <h2>Working Version</h2>
+
+                <label>
+                    Title
+
+                    <input
+                        id="editor-title"
+                        type="text"
+                        value="<%= article.workingVersion.title %>"
+                    >
+                </label>
+
+                <label>
+                    Summary
+
+                    <textarea
+                        id="editor-summary"
+                    ><%= article.workingVersion.summary %></textarea>
+                </label>
+
+                <label>
+                    Category
+
+                    <input
+                        id="editor-category"
+                        type="text"
+                        value="<%= article.workingVersion.category %>"
+                    >
+                </label>
+
+                <label>
+                    Image URL
+
+                    <input
+                        id="editor-image"
+                        type="url"
+                        value="<%= article.workingVersion.imageUrl %>"
+                    >
+                </label>
+
+                <label>
+                    Content
+
+                    <textarea
+                        id="editor-content"
+                    ><%= article.workingVersion.content %></textarea>
+                </label>
+
+            </section>
+
+            <% if (article.status === "pending") { %>
+
+                <button
+                    type="button"
+                    id="editor-save"
+                >
+                    Save Changes
+                </button>
+
+                <button
+                    type="button"
+                    id="editor-approve"
+                >
+                    Approve and Publish
+                </button>
+
+                <section>
+
+                    <h3>Return to Reporter</h3>
+
+                    <textarea
+                        id="editor-note"
+                        placeholder="Explain what needs to be changed"
+                    ></textarea>
+
+                    <button
+                        type="button"
+                        id="editor-return"
+                    >
+                        Return for Changes
+                    </button>
+
+                </section>
+
+            <% } %>
+
+            <button
+                type="button"
+                id="editor-delete"
+            >
+                Delete Article
+            </button>
+
+            <p id="editor-message"></p>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>
