@@ -3,12 +3,23 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title><%= pageTitle %></title>
 
-    <link rel="stylesheet" href="/css/style.css">
-    <script src="/js/main.js" defer></script>
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+    <script
+        src="/js/feed.js"
+        defer
+    ></script>
 </head>
 
 <body>
@@ -18,62 +29,156 @@
 
         <nav>
             <a href="/">Home</a>
+            <a href="/login">Staff Login</a>
         </nav>
     </header>
 
     <main>
+
         <section>
+
             <h2>Latest News</h2>
 
-            <% if (articles.length === 0) { %>
+            <div id="feed-controls">
 
-                <p>No published articles are available.</p>
+                <label>
+                    Search
 
-            <% } else { %>
+                    <input
+                        type="search"
+                        id="feed-search"
+                        placeholder="Search by title"
+                    >
+                </label>
 
-                <div class="news-feed">
+                <label>
+                    Category
 
-                    <% articles.forEach(article => { %>
+                    <select id="feed-category">
 
-                        <article class="news-card">
+                        <option value="">
+                            All Categories
+                        </option>
 
-                            <p>
-                                <strong>
-                                    <%= article.publishedVersion.category %>
-                                </strong>
-                            </p>
+                        <% categories.forEach(category => { %>
 
-                            <h3>
-                                 <a href="/articles/<%= article._id %>">
-                                 <%= article.publishedVersion.title %>
-                                 </a>
-                            </h3>
+                            <option value="<%= category %>">
+                                <%= category %>
+                            </option>
 
-                            <p>
-                                <%= article.publishedVersion.summary %>
-                            </p>
+                        <% }) %>
 
-                            <p>
-                                By <%= article.author.displayName %>
-                            </p>
+                    </select>
+                </label>
 
-                            <p>
-                                Views: <%= article.totalViews %>
-                            </p>
+                <label>
+                    Viewed
 
-                        </article>
+                    <select id="feed-viewed">
 
-                    <% }) %>
+                        <option value="all">
+                            All
+                        </option>
 
-                </div>
+                        <option value="viewed">
+                            Viewed
+                        </option>
 
-            <% } %>
+                        <option value="unviewed">
+                            Not Viewed
+                        </option>
+
+                    </select>
+                </label>
+
+                <label>
+                    Sort
+
+                    <select id="feed-sort">
+
+                        <option value="newest">
+                            Newest
+                        </option>
+
+                        <option value="popular">
+                            Most Popular
+                        </option>
+
+                    </select>
+                </label>
+
+            </div>
+
+            <p
+                id="feed-message"
+                aria-live="polite"
+            ></p>
+
+            <div id="news-feed">
+
+                <% articles.forEach(article => { %>
+
+                    <article
+                        class="news-card"
+                        data-article-id="<%= article._id %>"
+                    >
+
+                        <% if (article.publishedVersion.imageUrl) { %>
+
+                            <img
+                                src="<%= article.publishedVersion.imageUrl %>"
+                                alt="<%= article.publishedVersion.title %>"
+                                loading="lazy"
+                            >
+
+                        <% } %>
+
+                        <p>
+                            <strong>
+                                <%= article.publishedVersion.category %>
+                            </strong>
+                        </p>
+
+                        <h3>
+                            <a
+                                href="/articles/<%= article._id %>"
+                            >
+                                <%= article.publishedVersion.title %>
+                            </a>
+                        </h3>
+
+                        <p>
+                            <%= article.publishedVersion.summary %>
+                        </p>
+
+                        <p>
+                            By
+                            <%= article.author.displayName %>
+                        </p>
+
+                        <p>
+                            <%= new Date(article.publishedAt).toLocaleString() %>
+                        </p>
+
+                    </article>
+
+                <% }) %>
+
+            </div>
+
+            <div
+                id="feed-sentinel"
+                aria-hidden="true"
+            ></div>
 
         </section>
+
     </main>
 
     <footer>
-        <p>&copy; 2026 The Web Daily</p>
+        <p>
+            &copy; 2026 The Web Daily
+        </p>
     </footer>
 
 </body>

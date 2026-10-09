@@ -13,9 +13,14 @@ async function getDashboard(req, res) {
       articles
     });
   } catch (error) {
-    console.error("Reporter dashboard error:", error);
+    console.error(
+      "Reporter dashboard error:",
+      error
+    );
 
-    res.status(500).send("Internal Server Error");
+    res
+      .status(500)
+      .send("Internal Server Error");
   }
 }
 
@@ -30,9 +35,14 @@ async function createArticle(req, res) {
       `/reporter/articles/${article._id}/edit`
     );
   } catch (error) {
-    console.error("Create article error:", error);
+    console.error(
+      "Create article error:",
+      error
+    );
 
-    res.status(500).send("Internal Server Error");
+    res
+      .status(500)
+      .send("Internal Server Error");
   }
 }
 
@@ -44,13 +54,17 @@ async function getEditArticle(req, res) {
     });
 
     if (!article) {
-      return res.status(404).send("Article not found");
+      return res
+        .status(404)
+        .send("Article not found");
     }
 
     if (article.status === "pending") {
-      return res.status(403).send(
-        "Article is currently waiting for editor approval"
-      );
+      return res
+        .status(403)
+        .send(
+          "Article is currently waiting for editor approval"
+        );
     }
 
     res.render("reporter/edit", {
@@ -58,9 +72,14 @@ async function getEditArticle(req, res) {
       article
     });
   } catch (error) {
-    console.error("Edit article error:", error);
+    console.error(
+      "Edit article error:",
+      error
+    );
 
-    res.status(500).send("Internal Server Error");
+    res
+      .status(500)
+      .send("Internal Server Error");
   }
 }
 
@@ -107,6 +126,17 @@ async function autosaveArticle(req, res) {
     article.workingVersion.imageUrl =
       String(imageUrl || "").trim();
 
+    /*
+      A published article becomes a new draft
+      as soon as the reporter changes it.
+
+      The existing publishedVersion is NOT changed,
+      so readers continue seeing the last approved version.
+    */
+    if (article.status === "published") {
+      article.status = "draft";
+    }
+
     await article.save();
 
     res.json({
@@ -114,7 +144,10 @@ async function autosaveArticle(req, res) {
       savedAt: new Date()
     });
   } catch (error) {
-    console.error("Autosave error:", error);
+    console.error(
+      "Autosave error:",
+      error
+    );
 
     res.status(500).json({
       message: "Unable to save article"
@@ -135,8 +168,15 @@ async function submitArticle(req, res) {
       });
     }
 
+    /*
+      Only a draft or an article returned
+      by the editor may be submitted.
+
+      A published article first becomes draft
+      when the reporter edits it.
+    */
     if (
-      !["draft", "returned", "published"].includes(
+      !["draft", "returned"].includes(
         article.status
       )
     ) {
@@ -146,7 +186,8 @@ async function submitArticle(req, res) {
       });
     }
 
-    const version = article.workingVersion;
+    const version =
+      article.workingVersion;
 
     if (
       !version.title ||
@@ -166,13 +207,18 @@ async function submitArticle(req, res) {
     await article.save();
 
     res.json({
-      message: "Article submitted for editor approval"
+      message:
+        "Article submitted for editor approval"
     });
   } catch (error) {
-    console.error("Submit article error:", error);
+    console.error(
+      "Submit article error:",
+      error
+    );
 
     res.status(500).json({
-      message: "Unable to submit article"
+      message:
+        "Unable to submit article"
     });
   }
 }

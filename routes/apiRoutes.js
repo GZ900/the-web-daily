@@ -2,26 +2,46 @@ const express = require("express");
 
 const {
   createComment
-} = require("../controllers/commentController");
+} = require(
+  "../controllers/commentController"
+);
 
 const {
   autosaveArticle,
   submitArticle
-} = require("../controllers/reporterController");
+} = require(
+  "../controllers/reporterController"
+);
 
 const {
   updateArticle,
   approveArticle,
   returnArticle,
   deleteArticle
-} = require("../controllers/editorController");
+} = require(
+  "../controllers/editorController"
+);
+
+const {
+  getFeedArticles
+} = require(
+  "../controllers/feedController"
+);
 
 const {
   requireReporter,
   requireEditor
-} = require("../middleware/auth");
+} = require(
+  "../middleware/auth"
+);
 
-const router = express.Router();
+const router =
+  express.Router();
+
+router.get(
+  "/articles",
+  getFeedArticles
+);
 
 router.post(
   "/articles/:id/comments",

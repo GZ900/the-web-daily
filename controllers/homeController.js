@@ -5,20 +5,49 @@ require("../models/User");
 async function getHome(req, res) {
   try {
     const articles = await Article.find({
-      publishedVersion: { $ne: null }
+      publishedVersion: {
+        $ne: null
+      }
     })
-      .populate("author", "displayName")
-      .sort({ publishedAt: -1 })
-      .limit(20);
+      .populate(
+        "author",
+        "displayName"
+      )
+      .sort({
+        publishedAt: -1
+      })
+      .limit(20)
+      .lean();
+
+    const categories =
+      await Article.distinct(
+        "publishedVersion.category",
+        {
+          publishedVersion: {
+            $ne: null
+          }
+        }
+      );
+
+    categories.sort();
 
     res.render("home", {
-      pageTitle: "The Web Daily",
-      articles
+      pageTitle:
+        "The Web Daily",
+      articles,
+      categories
     });
   } catch (error) {
-    console.error("Home page error:", error);
+    console.error(
+      "Home page error:",
+      error
+    );
 
-    res.status(500).send("Internal Server Error");
+    res
+      .status(500)
+      .send(
+        "Internal Server Error"
+      );
   }
 }
 
