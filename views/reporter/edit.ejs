@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title><%= pageTitle %> | The Web Daily</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+    <script
+        src="/js/reporterEditor.js"
+        defer
+    ></script>
+</head>
+
+<body>
+
+    <header>
+        <h1>The Web Daily</h1>
+
+        <nav>
+            <a href="/reporter">
+                Reporter Dashboard
+            </a>
+        </nav>
+    </header>
+
+    <main>
+
+        <section
+            id="article-editor"
+            data-article-id="<%= article._id %>"
+        >
+
+            <h2>Edit Article</h2>
+
+            <p>
+                Status:
+                <strong><%= article.status %></strong>
+            </p>
+
+            <% if (article.publishedVersion) { %>
+
+                <p>
+                    This article already has a published version.
+                    Your changes will not become public until
+                    an editor approves them.
+                </p>
+
+            <% } %>
+
+            <% if (article.editorNote) { %>
+
+                <p>
+                    <strong>Editor note:</strong>
+                    <%= article.editorNote %>
+                </p>
+
+            <% } %>
+
+            <label>
+                Title
+
+                <input
+                    id="article-title"
+                    type="text"
+                    value="<%= article.workingVersion.title %>"
+                >
+            </label>
+
+            <label>
+                Summary
+
+                <textarea
+                    id="article-summary"
+                ><%= article.workingVersion.summary %></textarea>
+            </label>
+
+            <label>
+                Category
+
+                <input
+                    id="article-category"
+                    type="text"
+                    value="<%= article.workingVersion.category %>"
+                >
+            </label>
+
+            <label>
+                Image URL
+
+                <input
+                    id="article-image"
+                    type="url"
+                    value="<%= article.workingVersion.imageUrl %>"
+                >
+            </label>
+
+            <label>
+                Content
+
+                <textarea
+                    id="article-content"
+                ><%= article.workingVersion.content %></textarea>
+            </label>
+
+            <p id="save-status">
+                Ready
+            </p>
+
+            <button
+                type="button"
+                id="submit-review"
+            >
+                Submit for Review
+            </button>
+
+            <p id="submit-message"></p>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

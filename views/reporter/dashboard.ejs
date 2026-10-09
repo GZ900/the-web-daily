@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -33,14 +32,75 @@
 
         <p>
             Welcome,
-            <strong>
-                <%= currentUser.displayName %>
-            </strong>
+            <strong><%= currentUser.displayName %></strong>
         </p>
 
-        <p>
-            Reporter workspace is ready.
-        </p>
+        <form
+            method="POST"
+            action="/reporter/articles"
+        >
+            <button type="submit">
+                Create New Article
+            </button>
+        </form>
+
+        <section>
+
+            <h2>My Articles</h2>
+
+            <% if (articles.length === 0) { %>
+
+                <p>You have no articles yet.</p>
+
+            <% } else { %>
+
+                <% articles.forEach(article => { %>
+
+                    <article class="news-card">
+
+                        <h3>
+                            <%= article.workingVersion.title || "Untitled Article" %>
+                        </h3>
+
+                        <p>
+                            Status:
+                            <strong>
+                                <%= article.status %>
+                            </strong>
+                        </p>
+
+                        <% if (article.editorNote) { %>
+
+                            <p>
+                                Editor note:
+                                <%= article.editorNote %>
+                            </p>
+
+                        <% } %>
+
+                        <% if (article.status !== "pending") { %>
+
+                            <a
+                                href="/reporter/articles/<%= article._id %>/edit"
+                            >
+                                Edit Article
+                            </a>
+
+                        <% } else { %>
+
+                            <p>
+                                Waiting for editor approval
+                            </p>
+
+                        <% } %>
+
+                    </article>
+
+                <% }) %>
+
+            <% } %>
+
+        </section>
 
         <form method="POST" action="/logout">
             <button type="submit">

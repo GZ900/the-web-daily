@@ -1,10 +1,10 @@
 const Article = require("../models/Article");
+
 require("../models/User");
 
 async function getHome(req, res) {
   try {
     const articles = await Article.find({
-      status: "published",
       publishedVersion: { $ne: null }
     })
       .populate("author", "displayName")

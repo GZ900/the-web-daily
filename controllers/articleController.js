@@ -17,7 +17,6 @@ async function getArticle(req, res) {
     const article = await Article.findOneAndUpdate(
       {
         _id: req.params.id,
-        status: "published",
         publishedVersion: { $ne: null }
       },
       {
