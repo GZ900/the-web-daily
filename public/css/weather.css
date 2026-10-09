@@ -1,0 +1,100 @@
+.home-layout {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        280px;
+    gap: 32px;
+    align-items: start;
+}
+
+.feed-column {
+    min-width: 0;
+}
+
+.weather-sidebar {
+    min-width: 0;
+}
+
+.weather-widget {
+    position: sticky;
+    top: 20px;
+
+    padding: 20px;
+
+    background: white;
+
+    border:
+        1px solid #d8d8d8;
+
+    border-radius: 12px;
+}
+
+.weather-widget h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+.weather-location {
+    margin-bottom: 6px;
+}
+
+.weather-temperature {
+    margin: 0;
+
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.weather-description {
+    margin-top: 4px;
+    margin-bottom: 20px;
+}
+
+.weather-details {
+    margin: 0;
+}
+
+.weather-details div {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+
+    padding: 8px 0;
+
+    border-bottom:
+        1px solid #eeeeee;
+}
+
+.weather-details dt {
+    font-weight: 600;
+}
+
+.weather-details dd {
+    margin: 0;
+}
+
+.weather-warning {
+    margin-top: 16px;
+
+    font-size: 0.9rem;
+}
+
+.weather-source {
+    margin-top: 18px;
+
+    font-size: 0.8rem;
+}
+
+@media (max-width: 850px) {
+    .home-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .weather-sidebar {
+        order: -1;
+    }
+
+    .weather-widget {
+        position: static;
+    }
+}

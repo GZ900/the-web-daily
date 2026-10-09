@@ -1,41 +1,63 @@
-const Article = require("../models/Article");
+const Article =
+  require("../models/Article");
+
+const {
+  getWeather
+} = require(
+  "../services/weatherService"
+);
 
 require("../models/User");
 
 async function getHome(req, res) {
   try {
-    const articles = await Article.find({
-      publishedVersion: {
-        $ne: null
-      }
-    })
-      .populate(
-        "author",
-        "displayName"
-      )
-      .sort({
-        publishedAt: -1
+    const [
+      articles,
+      categoryResults,
+      weather
+    ] = await Promise.all([
+      Article.find({
+        publishedVersion: {
+          $ne: null
+        }
       })
-      .limit(20)
-      .lean();
+        .populate(
+          "author",
+          "displayName"
+        )
+        .sort({
+          publishedAt: -1
+        })
+        .limit(20)
+        .lean()
+        .exec(),
 
-    const categories =
-      await Article.distinct(
+      Article.distinct(
         "publishedVersion.category",
         {
           publishedVersion: {
             $ne: null
           }
         }
-      );
+      ).exec(),
 
-    categories.sort();
+      getWeather()
+    ]);
+
+    const categories =
+      categoryResults
+        .filter(Boolean)
+        .sort((a, b) =>
+          a.localeCompare(b)
+        );
 
     res.render("home", {
       pageTitle:
         "The Web Daily",
+
       articles,
-      categories
+      categories,
+      weather
     });
   } catch (error) {
     console.error(

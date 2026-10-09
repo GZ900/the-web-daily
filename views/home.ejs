@@ -16,6 +16,11 @@
         href="/css/style.css"
     >
 
+    <link
+        rel="stylesheet"
+        href="/css/weather.css"
+    >
+
     <script
         src="/js/feed.js"
         defer
@@ -33,9 +38,9 @@
         </nav>
     </header>
 
-    <main>
+    <main class="home-layout">
 
-        <section>
+        <section class="feed-column">
 
             <h2>Latest News</h2>
 
@@ -172,6 +177,98 @@
             ></div>
 
         </section>
+
+        <aside
+            class="weather-sidebar"
+            aria-label="Weather"
+        >
+
+            <section class="weather-widget">
+
+                <h2>Weather</h2>
+
+                <% if (weather) { %>
+
+                    <p class="weather-location">
+                        <strong>
+                            <%= weather.location %>
+                        </strong>
+                    </p>
+
+                    <p class="weather-temperature">
+                        <%= Math.round(weather.temperature) %>°C
+                    </p>
+
+                    <p class="weather-description">
+                        <%= weather.description %>
+                    </p>
+
+                    <dl class="weather-details">
+
+                        <div>
+                            <dt>Feels like</dt>
+
+                            <dd>
+                                <%= Math.round(weather.apparentTemperature) %>°C
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>Humidity</dt>
+
+                            <dd>
+                                <%= weather.humidity %>%
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>Wind</dt>
+
+                            <dd>
+                                <%= Math.round(weather.windSpeed) %> km/h
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>Precipitation</dt>
+
+                            <dd>
+                                <%= weather.precipitation %> mm
+                            </dd>
+                        </div>
+
+                    </dl>
+
+                    <% if (weather.stale) { %>
+
+                        <p class="weather-warning">
+                            Showing the last available weather data.
+                        </p>
+
+                    <% } %>
+
+                    <p class="weather-source">
+                        Weather data:
+                        <a
+                            href="https://open-meteo.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Open-Meteo
+                        </a>
+                    </p>
+
+                <% } else { %>
+
+                    <p>
+                        Weather information is temporarily unavailable.
+                    </p>
+
+                <% } %>
+
+            </section>
+
+        </aside>
 
     </main>
 
