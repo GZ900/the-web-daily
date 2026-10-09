@@ -2,7 +2,11 @@ const express = require("express");
 const path = require("path");
 
 const connectDB = require("./config/db");
+
 const publicRoutes = require("./routes/publicRoutes");
+const apiRoutes = require("./routes/apiRoutes");
+
+const deviceIdentifier = require("./middleware/deviceIdentifier");
 
 const app = express();
 
@@ -16,7 +20,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use(deviceIdentifier);
+
 app.use("/", publicRoutes);
+app.use("/api", apiRoutes);
 
 async function startServer() {
   await connectDB();

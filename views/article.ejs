@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title><%= pageTitle %> | The Web Daily</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+    <script
+        src="/js/article.js"
+        defer
+    ></script>
+</head>
+
+<body>
+
+    <header>
+        <h1>The Web Daily</h1>
+
+        <nav>
+            <a href="/">Home</a>
+        </nav>
+    </header>
+
+    <main>
+
+        <article
+            class="article-page"
+            data-article-id="<%= article._id %>"
+        >
+
+            <p>
+                <strong>
+                    <%= article.publishedVersion.category %>
+                </strong>
+            </p>
+
+            <h2>
+                <%= article.publishedVersion.title %>
+            </h2>
+
+            <p>
+                By <%= article.author.displayName %>
+            </p>
+
+            <p>
+                Published:
+                <%= new Date(article.publishedAt).toLocaleString() %>
+            </p>
+
+            <p>
+                Views:
+                <%= article.totalViews %>
+            </p>
+
+            <% if (article.publishedVersion.imageUrl) { %>
+
+                <img
+                    src="<%= article.publishedVersion.imageUrl %>"
+                    alt="<%= article.publishedVersion.title %>"
+                >
+
+            <% } %>
+
+            <div class="article-content">
+                <p>
+                    <%= article.publishedVersion.content %>
+                </p>
+            </div>
+
+        </article>
+
+        <section class="comments-section">
+
+            <h2>Comments</h2>
+
+            <form id="comment-form">
+
+                <label>
+                    Name
+
+                    <input
+                        type="text"
+                        id="comment-name"
+                        maxlength="80"
+                        required
+                    >
+                </label>
+
+                <label>
+                    Comment
+
+                    <textarea
+                        id="comment-text"
+                        maxlength="2000"
+                        required
+                    ></textarea>
+                </label>
+
+                <button type="submit">
+                    Add Comment
+                </button>
+
+            </form>
+
+            <p
+                id="comment-message"
+                aria-live="polite"
+            ></p>
+
+            <div id="comments-list">
+
+                <% comments.forEach(comment => { %>
+
+                    <article class="comment">
+
+                        <strong>
+                            <%= comment.name %>
+                        </strong>
+
+                        <p>
+                            <%= comment.text %>
+                        </p>
+
+                        <small>
+                            <%= new Date(comment.createdAt).toLocaleString() %>
+                        </small>
+
+                    </article>
+
+                <% }) %>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 The Web Daily</p>
+    </footer>
+
+</body>
+
+</html>
