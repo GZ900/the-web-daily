@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title><%= pageTitle %> | The Web Daily</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+</head>
+
+<body>
+
+    <header>
+        <h1>The Web Daily</h1>
+
+        <nav>
+            <a href="/">Home</a>
+        </nav>
+    </header>
+
+    <main>
+
+        <section class="login-page">
+
+            <h2>Staff Login</h2>
+
+            <% if (errorMessage) { %>
+
+                <p>
+                    <%= errorMessage %>
+                </p>
+
+            <% } %>
+
+            <form method="POST" action="/login">
+
+                <label>
+                    Username
+
+                    <input
+                        type="text"
+                        name="username"
+                        required
+                        autocomplete="username"
+                    >
+                </label>
+
+                <label>
+                    Password
+
+                    <input
+                        type="password"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                    >
+                </label>
+
+                <button type="submit">
+                    Login
+                </button>
+
+            </form>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

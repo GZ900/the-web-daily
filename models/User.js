@@ -1,5 +1,22 @@
 const mongoose = require("mongoose");
 
+const sessionSchema = new mongoose.Schema(
+  {
+    tokenHash: {
+      type: String,
+      required: true
+    },
+
+    expiresAt: {
+      type: Date,
+      required: true
+    }
+  },
+  {
+    _id: false
+  }
+);
+
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -32,6 +49,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["reporter", "editor"],
       required: true
+    },
+
+    sessions: {
+      type: [sessionSchema],
+      default: []
     }
   },
   {
