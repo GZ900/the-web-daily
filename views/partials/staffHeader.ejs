@@ -1,55 +1,283 @@
-<header class="dashboard-header">
+<%
+    const resolvedRole =
+        typeof staffRole !== "undefined" && staffRole
+            ? staffRole
+            : currentUser
+                ? currentUser.role
+                : null;
 
-    <h1>
-        The Web Daily
-    </h1>
+    const resolvedSection =
+        typeof activeSection !== "undefined"
+            ? activeSection
+            : "";
+%>
 
-    <div class="dashboard-header-actions">
+<script src="/js/theme.js"></script>
 
-        <nav>
+<header class="site-header">
 
-            <a href="/">
+    <div class="site-header-inner">
+
+        <a
+            class="brand-lockup"
+            href="/"
+            aria-label="The Web Daily home"
+        >
+
+            <span
+                class="brand-mark"
+                aria-hidden="true"
+            >
+                <span>W</span>
+
+                <span class="brand-mark-dot"></span>
+
+                <span>D</span>
+            </span>
+
+            <span class="brand-copy">
+
+                <strong>
+                    The Web Daily
+                </strong>
+
+                <small>
+                    Digital Newsroom
+                </small>
+
+            </span>
+
+        </a>
+
+        <div class="site-header-controls">
+
+            <nav
+                class="desktop-navigation"
+                aria-label="Primary navigation"
+            >
+
+                <a
+                    class="nav-link <%= resolvedSection === 'home' ? 'nav-link-active' : '' %>"
+                    href="/"
+                >
+                    Home
+                </a>
+
+                <% if (!currentUser) { %>
+
+                    <a
+                        class="nav-link"
+                        href="/login"
+                    >
+                        Staff Login
+                    </a>
+
+                <% } %>
+
+                <% if (resolvedRole === "reporter") { %>
+
+                    <a
+                        class="nav-link <%= resolvedSection === 'dashboard' ? 'nav-link-active' : '' %>"
+                        href="/reporter"
+                    >
+                        Dashboard
+                    </a>
+
+                <% } %>
+
+                <% if (resolvedRole === "editor") { %>
+
+                    <a
+                        class="nav-link <%= resolvedSection === 'dashboard' ? 'nav-link-active' : '' %>"
+                        href="/editor"
+                    >
+                        Dashboard
+                    </a>
+
+                    <a
+                        class="nav-link <%= resolvedSection === 'analytics' ? 'nav-link-active' : '' %>"
+                        href="/editor/analytics"
+                    >
+                        Analytics
+                    </a>
+
+                    <a
+                        class="nav-link <%= resolvedSection === 'users' ? 'nav-link-active' : '' %>"
+                        href="/editor/users"
+                    >
+                        Users
+                    </a>
+
+                    <a
+                        class="nav-link <%= resolvedSection === 'comments' ? 'nav-link-active' : '' %>"
+                        href="/editor/comments"
+                    >
+                        Comments
+                    </a>
+
+                <% } %>
+
+                <% if (currentUser) { %>
+
+                    <form
+                        class="header-logout-form"
+                        method="POST"
+                        action="/logout"
+                    >
+                        <button
+                            class="nav-button"
+                            type="submit"
+                        >
+                            Logout
+                        </button>
+                    </form>
+
+                <% } %>
+
+            </nav>
+
+            <button
+                type="button"
+                class="icon-button theme-toggle"
+                id="theme-toggle"
+                aria-label="Change colour theme"
+            >
+
+                <svg
+                    class="theme-icon theme-icon-moon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        d="M20.2 15.2A8.5 8.5 0 0 1 8.8 3.8 8.5 8.5 0 1 0 20.2 15.2Z"
+                    ></path>
+                </svg>
+
+                <svg
+                    class="theme-icon theme-icon-sun"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="4"
+                    ></circle>
+
+                    <path
+                        d="M12 2V4 M12 20V22 M4.93 4.93L6.34 6.34 M17.66 17.66L19.07 19.07 M2 12H4 M20 12H22 M4.93 19.07L6.34 17.66 M17.66 6.34L19.07 4.93"
+                    ></path>
+                </svg>
+
+            </button>
+
+            <button
+                type="button"
+                class="icon-button menu-toggle"
+                id="menu-toggle"
+                aria-label="Open navigation menu"
+                aria-expanded="false"
+                aria-controls="mobile-navigation"
+            >
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <div
+        class="mobile-navigation"
+        id="mobile-navigation"
+        hidden
+    >
+
+        <nav aria-label="Mobile navigation">
+
+            <a
+                class="mobile-nav-link"
+                href="/"
+            >
                 Home
             </a>
 
-            <% if (staffRole === "reporter") { %>
+            <% if (!currentUser) { %>
 
-                <a href="/reporter">
+                <a
+                    class="mobile-nav-link"
+                    href="/login"
+                >
+                    Staff Login
+                </a>
+
+            <% } %>
+
+            <% if (resolvedRole === "reporter") { %>
+
+                <a
+                    class="mobile-nav-link"
+                    href="/reporter"
+                >
                     Dashboard
                 </a>
 
             <% } %>
 
-            <% if (staffRole === "editor") { %>
+            <% if (resolvedRole === "editor") { %>
 
-                <a href="/editor">
+                <a
+                    class="mobile-nav-link"
+                    href="/editor"
+                >
                     Dashboard
                 </a>
 
-                <a href="/editor/analytics">
+                <a
+                    class="mobile-nav-link"
+                    href="/editor/analytics"
+                >
                     Analytics
                 </a>
 
-                <a href="/editor/users">
+                <a
+                    class="mobile-nav-link"
+                    href="/editor/users"
+                >
                     Users
                 </a>
 
-                <a href="/editor/comments">
+                <a
+                    class="mobile-nav-link"
+                    href="/editor/comments"
+                >
                     Comments
                 </a>
 
             <% } %>
 
-        </nav>
+            <% if (currentUser) { %>
 
-        <form
-            method="POST"
-            action="/logout"
-        >
-            <button type="submit">
-                Logout
-            </button>
-        </form>
+                <form
+                    method="POST"
+                    action="/logout"
+                >
+
+                    <button
+                        type="submit"
+                        class="mobile-nav-link mobile-logout-button"
+                    >
+                        Logout
+                    </button>
+
+                </form>
+
+            <% } %>
+
+        </nav>
 
     </div>
 

@@ -9,6 +9,11 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <meta
+        name="color-scheme"
+        content="light dark"
+    >
+
     <title><%= pageTitle %></title>
 
     <link
@@ -27,147 +32,238 @@
     ></script>
 </head>
 
-<body>
+<body class="staff-page">
 
     <%- include("../partials/staffHeader", {
-        staffRole: "editor"
+        staffRole: "editor",
+        activeSection: "comments"
     }) %>
 
-    <main>
+    <main class="dashboard-shell">
 
-        <h2>
-            Comment Management
-        </h2>
+        <header class="dashboard-page-heading">
 
-        <form
-            class="dashboard-controls"
-            method="GET"
-            action="/editor/comments"
+            <div>
+
+                <span class="dashboard-eyebrow">
+                    MODERATION
+                </span>
+
+                <h1>
+                    Comment Management.
+                </h1>
+
+                <p>
+                    Review, edit and remove
+                    reader comments across
+                    published stories.
+                </p>
+
+            </div>
+
+        </header>
+
+        <section class="dashboard-controls-panel">
+
+            <form
+                class="dashboard-controls comment-filter-controls"
+                method="GET"
+                action="/editor/comments"
+            >
+
+                <label class="dashboard-control dashboard-search-control">
+
+                    <span>
+                        Search
+                    </span>
+
+                    <input
+                        type="search"
+                        name="search"
+                        value="<%= search %>"
+                        placeholder="Name or comment text"
+                    >
+
+                </label>
+
+                <label class="dashboard-control">
+
+                    <span>
+                        Sort
+                    </span>
+
+                    <select name="sort">
+
+                        <option
+                            value="newest"
+                            <%= selectedSort === "newest" ? "selected" : "" %>
+                        >
+                            Newest
+                        </option>
+
+                        <option
+                            value="oldest"
+                            <%= selectedSort === "oldest" ? "selected" : "" %>
+                        >
+                            Oldest
+                        </option>
+
+                    </select>
+
+                </label>
+
+                <div class="dashboard-filter-actions">
+
+                    <button
+                        class="secondary-action"
+                        type="submit"
+                    >
+                        Apply
+                    </button>
+
+                    <a
+                        class="text-action"
+                        href="/editor/comments"
+                    >
+                        Clear
+                    </a>
+
+                </div>
+
+            </form>
+
+        </section>
+
+        <div class="dashboard-result-heading">
+
+            <p class="dashboard-summary">
+
+                <strong>
+                    <%= totalComments %>
+                </strong>
+
+                comment<%= totalComments === 1 ? "" : "s" %>
+
+            </p>
+
+        </div>
+
+        <section
+            id="comment-list"
+            class="management-list"
         >
-
-            <label>
-                Search
-
-                <input
-                    type="search"
-                    name="search"
-                    value="<%= search %>"
-                    placeholder="Name or comment text"
-                >
-            </label>
-
-            <label>
-                Sort
-
-                <select name="sort">
-
-                    <option
-                        value="newest"
-                        <%= selectedSort === "newest" ? "selected" : "" %>
-                    >
-                        Newest
-                    </option>
-
-                    <option
-                        value="oldest"
-                        <%= selectedSort === "oldest" ? "selected" : "" %>
-                    >
-                        Oldest
-                    </option>
-
-                </select>
-            </label>
-
-            <button type="submit">
-                Apply
-            </button>
-
-            <a href="/editor/comments">
-                Clear
-            </a>
-
-        </form>
-
-        <p>
-            <strong>
-                <%= totalComments %>
-            </strong>
-            comments found
-        </p>
-
-        <section id="comment-list">
 
             <% comments.forEach(comment => { %>
 
+                <%
+                    const articleTitle =
+                        comment.article
+                            ? (
+                                comment.article.publishedVersion &&
+                                comment.article.publishedVersion.title
+                                    ? comment.article.publishedVersion.title
+                                    : comment.article.workingVersion.title
+                            )
+                            : "Deleted article";
+                %>
+
                 <article
-                    class="dashboard-article comment-card"
+                    class="management-card comment-card"
                     data-comment-id="<%= comment._id %>"
                 >
 
-                    <p>
-                        Article:
-                        <strong>
-                            <%
-                                const articleTitle =
-                                    comment.article
-                                        ? (
-                                            comment.article.publishedVersion &&
-                                            comment.article.publishedVersion.title
-                                                ? comment.article.publishedVersion.title
-                                                : comment.article.workingVersion.title
-                                        )
-                                        : "Deleted article";
-                            %>
+                    <div class="comment-card-header">
 
-                            <%= articleTitle %>
-                        </strong>
-                    </p>
+                        <div>
 
-                    <label>
-                        Name
+                            <span class="management-card-label">
+                                ARTICLE
+                            </span>
 
-                        <input
-                            class="comment-name"
-                            value="<%= comment.name %>"
+                            <h2>
+                                <%= articleTitle %>
+                            </h2>
+
+                        </div>
+
+                        <time
+                            datetime="<%= new Date(comment.createdAt).toISOString() %>"
                         >
-                    </label>
+                            <%= new Date(
+                                comment.createdAt
+                            ).toLocaleString(
+                                "en-GB",
+                                {
+                                    day: "2-digit",
+                                    month: "short",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: false
+                                }
+                            ) %>
+                        </time>
 
-                    <label>
-                        Comment
+                    </div>
 
-                        <textarea
-                            class="comment-text"
-                            rows="4"
-                        ><%= comment.text %></textarea>
-                    </label>
+                    <div class="comment-editor-grid">
 
-                    <p>
-                        Created:
-                        <%= new Date(comment.createdAt).toLocaleString("en-GB") %>
-                    </p>
+                        <label class="dashboard-control">
 
-                    <button
-                        type="button"
-                        class="save-comment"
-                    >
-                        Save
-                    </button>
+                            <span>
+                                Reader Name
+                            </span>
 
-                    <button
-                        type="button"
-                        class="delete-comment"
-                    >
-                        Delete
-                    </button>
+                            <input
+                                class="comment-name"
+                                value="<%= comment.name %>"
+                            >
 
-                    <p
-                        class="comment-message"
-                        aria-live="polite"
-                    ></p>
+                        </label>
+
+                        <label class="dashboard-control">
+
+                            <span>
+                                Comment
+                            </span>
+
+                            <textarea
+                                class="comment-text"
+                                rows="4"
+                            ><%= comment.text %></textarea>
+
+                        </label>
+
+                    </div>
+
+                    <div class="management-card-footer">
+
+                        <p
+                            class="comment-message management-message"
+                            aria-live="polite"
+                        ></p>
+
+                        <div class="management-actions">
+
+                            <button
+                                type="button"
+                                class="save-comment secondary-action"
+                            >
+                                Save Changes
+                            </button>
+
+                            <button
+                                type="button"
+                                class="delete-comment danger-action"
+                            >
+                                Delete
+                            </button>
+
+                        </div>
+
+                    </div>
 
                 </article>
-
-                <hr>
 
             <% }) %>
 
@@ -175,7 +271,10 @@
 
         <% if (totalPages > 1) { %>
 
-            <nav class="dashboard-pagination">
+            <nav
+                class="dashboard-pagination"
+                aria-label="Comment pages"
+            >
 
                 <% if (page > 1) { %>
 
@@ -187,7 +286,7 @@
 
                 <% } %>
 
-                <span>
+                <span class="pagination-summary">
                     Page
                     <%= page %>
                     of

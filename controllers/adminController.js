@@ -21,6 +21,21 @@ const {
 
 const PAGE_SIZE = 25;
 
+const MAX_SEARCH_LENGTH = 200;
+
+const USER_LIMITS = {
+  usernameMin: 3,
+  usernameMax: 50,
+  displayNameMax: 100,
+  passwordMin: 8,
+  passwordMax: 256
+};
+
+const COMMENT_LIMITS = {
+  name: 80,
+  text: 2000
+};
+
 function escapeRegex(value) {
   return value.replace(
     /[.*+?^${}()|[\]\\]/g,
@@ -36,6 +51,67 @@ function getPage(value) {
     ) || 1,
     1
   );
+}
+
+function getSearchValue(value) {
+  return String(
+    value || ""
+  )
+    .trim()
+    .slice(
+      0,
+      MAX_SEARCH_LENGTH
+    );
+}
+
+function validateUserFields({
+  username,
+  displayName,
+  password,
+  requirePassword
+}) {
+  if (
+    !username ||
+    !displayName ||
+    (
+      requirePassword &&
+      !password
+    )
+  ) {
+    return requirePassword
+      ? "Username, display name and password are required"
+      : "Username and display name are required";
+  }
+
+  if (
+    username.length <
+      USER_LIMITS.usernameMin ||
+    username.length >
+      USER_LIMITS.usernameMax
+  ) {
+    return "Username must contain between 3 and 50 characters";
+  }
+
+  if (
+    displayName.length >
+    USER_LIMITS.displayNameMax
+  ) {
+    return "Display name is too long";
+  }
+
+  if (
+    password &&
+    (
+      password.length <
+        USER_LIMITS.passwordMin ||
+      password.length >
+        USER_LIMITS.passwordMax
+    )
+  ) {
+    return "Password must contain between 8 and 256 characters";
+  }
+
+  return null;
 }
 
 function handleValidationError(
@@ -58,7 +134,7 @@ function handleValidationError(
   if (
     error &&
     error.name ===
-      "ValidationError"
+    "ValidationError"
   ) {
     return res
       .status(400)
@@ -91,9 +167,9 @@ async function getUsersPage(
 ) {
   try {
     const search =
-      String(
-        req.query.search || ""
-      ).trim();
+      getSearchValue(
+        req.query.search
+      );
 
     const requestedRole =
       String(
@@ -136,7 +212,6 @@ async function getUsersPage(
           username:
             regex
         },
-
         {
           displayName:
             regex
@@ -173,7 +248,8 @@ async function getUsersPage(
         )
         .sort({
           displayName: 1,
-          username: 1
+          username: 1,
+          _id: 1
         })
         .skip(
           (
@@ -203,7 +279,7 @@ async function getUsersPage(
       );
     }
 
-    res.render(
+    return res.render(
       "editor/users",
       {
         pageTitle:
@@ -212,6 +288,7 @@ async function getUsersPage(
         users,
 
         search,
+
         selectedRole:
           role,
 
@@ -231,7 +308,7 @@ async function getUsersPage(
       error
     );
 
-    res
+    return res
       .status(500)
       .send(
         "Internal Server Error"
@@ -264,16 +341,21 @@ async function createUser(
         req.body.role || ""
       );
 
-    if (
-      !username ||
-      !displayName ||
-      !password
-    ) {
+    const validationError =
+      validateUserFields({
+        username,
+        displayName,
+        password,
+        requirePassword:
+          true
+      });
+
+    if (validationError) {
       return res
         .status(400)
         .json({
           message:
-            "Username, display name and password are required"
+            validationError
         });
     }
 
@@ -288,17 +370,6 @@ async function createUser(
         .json({
           message:
             "Invalid user role"
-        });
-    }
-
-    if (
-      password.length < 8
-    ) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Password must contain at least 8 characters"
         });
     }
 
@@ -319,7 +390,7 @@ async function createUser(
         passwordSalt
       });
 
-    res
+    return res
       .status(201)
       .json({
         message:
@@ -402,15 +473,21 @@ async function updateUser(
         req.body.password || ""
       );
 
-    if (
-      !username ||
-      !displayName
-    ) {
+    const validationError =
+      validateUserFields({
+        username,
+        displayName,
+        password,
+        requirePassword:
+          false
+      });
+
+    if (validationError) {
       return res
         .status(400)
         .json({
           message:
-            "Username and display name are required"
+            validationError
         });
     }
 
@@ -456,7 +533,8 @@ async function updateUser(
     ) {
       const editorCount =
         await User.countDocuments({
-          role: "editor"
+          role:
+            "editor"
         });
 
       if (
@@ -481,17 +559,6 @@ async function updateUser(
       role;
 
     if (password) {
-      if (
-        password.length < 8
-      ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Password must contain at least 8 characters"
-          });
-      }
-
       const {
         passwordHash,
         passwordSalt
@@ -509,7 +576,7 @@ async function updateUser(
 
     await user.save();
 
-    res.json({
+    return res.json({
       message:
         "User updated successfully"
     });
@@ -576,7 +643,8 @@ async function deleteUser(
     ) {
       const editorCount =
         await User.countDocuments({
-          role: "editor"
+          role:
+            "editor"
         });
 
       if (
@@ -608,7 +676,7 @@ async function deleteUser(
 
     await user.deleteOne();
 
-    res.json({
+    return res.json({
       message:
         "User deleted successfully"
     });
@@ -618,7 +686,7 @@ async function deleteUser(
       error
     );
 
-    res
+    return res
       .status(500)
       .json({
         message:
@@ -637,9 +705,9 @@ async function getCommentsPage(
 ) {
   try {
     const search =
-      String(
-        req.query.search || ""
-      ).trim();
+      getSearchValue(
+        req.query.search
+      );
 
     const sort =
       req.query.sort ===
@@ -668,7 +736,6 @@ async function getCommentsPage(
           name:
             regex
         },
-
         {
           text:
             regex
@@ -696,6 +763,11 @@ async function getCommentsPage(
         totalPages
       );
 
+    const sortDirection =
+      sort === "oldest"
+        ? 1
+        : -1;
+
     const comments =
       await Comment.find(
         filter
@@ -706,10 +778,10 @@ async function getCommentsPage(
         )
         .sort({
           createdAt:
-            sort ===
-            "oldest"
-              ? 1
-              : -1
+            sortDirection,
+
+          _id:
+            sortDirection
         })
         .skip(
           (
@@ -741,7 +813,7 @@ async function getCommentsPage(
       );
     }
 
-    res.render(
+    return res.render(
       "editor/comments",
       {
         pageTitle:
@@ -750,6 +822,7 @@ async function getCommentsPage(
         comments,
 
         search,
+
         selectedSort:
           sort,
 
@@ -769,7 +842,7 @@ async function getCommentsPage(
       error
     );
 
-    res
+    return res
       .status(500)
       .send(
         "Internal Server Error"
@@ -831,6 +904,30 @@ async function updateComment(
         });
     }
 
+    if (
+      name.length >
+      COMMENT_LIMITS.name
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Comment name is too long"
+        });
+    }
+
+    if (
+      text.length >
+      COMMENT_LIMITS.text
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Comment text is too long"
+        });
+    }
+
     comment.name =
       name;
 
@@ -839,7 +936,7 @@ async function updateComment(
 
     await comment.save();
 
-    res.json({
+    return res.json({
       message:
         "Comment updated successfully"
     });
@@ -886,7 +983,7 @@ async function deleteComment(
 
     await comment.deleteOne();
 
-    res.json({
+    return res.json({
       message:
         "Comment deleted successfully"
     });
@@ -896,7 +993,7 @@ async function deleteComment(
       error
     );
 
-    res
+    return res
       .status(500)
       .json({
         message:
@@ -927,7 +1024,7 @@ async function listViewStats(
     const articleId =
       String(
         req.query.articleId || ""
-      );
+      ).trim();
 
     if (articleId) {
       if (
@@ -947,61 +1044,88 @@ async function listViewStats(
         articleId;
     }
 
-    if (
-      req.query.from ||
-      req.query.to
-    ) {
-      filter.bucketStart =
-        {};
+    let fromDate = null;
+    let toDate = null;
 
-      if (req.query.from) {
-        const from =
-          new Date(
+    if (req.query.from) {
+      fromDate =
+        new Date(
+          String(
             req.query.from
-          );
-
-        if (
-          Number.isNaN(
-            from.getTime()
           )
-        ) {
-          return res
-            .status(400)
-            .json({
-              message:
-                "Invalid from date"
-            });
-        }
+        );
 
-        filter.bucketStart.$gte =
-          from;
-      }
-
-      if (req.query.to) {
-        const to =
-          new Date(
-            req.query.to
-          );
-
-        if (
-          Number.isNaN(
-            to.getTime()
-          )
-        ) {
-          return res
-            .status(400)
-            .json({
-              message:
-                "Invalid to date"
-            });
-        }
-
-        filter.bucketStart.$lte =
-          to;
+      if (
+        Number.isNaN(
+          fromDate.getTime()
+        )
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Invalid from date"
+          });
       }
     }
 
-    const page =
+    if (req.query.to) {
+      toDate =
+        new Date(
+          String(
+            req.query.to
+          )
+        );
+
+      if (
+        Number.isNaN(
+          toDate.getTime()
+        )
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Invalid to date"
+          });
+      }
+    }
+
+    if (
+      fromDate &&
+      toDate &&
+      fromDate > toDate
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "From date must be before or equal to to date"
+        });
+    }
+
+    if (
+      fromDate ||
+      toDate
+    ) {
+      filter.bucketStart = {};
+
+      if (fromDate) {
+        filter
+          .bucketStart
+          .$gte =
+          fromDate;
+      }
+
+      if (toDate) {
+        filter
+          .bucketStart
+          .$lte =
+          toDate;
+      }
+    }
+
+    const requestedPage =
       getPage(
         req.query.page
       );
@@ -1019,8 +1143,24 @@ async function listViewStats(
       );
 
     const total =
-      await ViewStat.countDocuments(
-        filter
+      await ViewStat
+        .countDocuments(
+          filter
+        );
+
+    const totalPages =
+      Math.max(
+        Math.ceil(
+          total /
+          limit
+        ),
+        1
+      );
+
+    const page =
+      Math.min(
+        requestedPage,
+        totalPages
       );
 
     const stats =
@@ -1032,7 +1172,8 @@ async function listViewStats(
           "publishedVersion.title workingVersion.title"
         )
         .sort({
-          bucketStart: -1
+          bucketStart: -1,
+          _id: -1
         })
         .skip(
           (
@@ -1040,23 +1181,16 @@ async function listViewStats(
           ) *
           limit
         )
-        .limit(limit)
+        .limit(
+          limit
+        )
         .lean();
 
-    res.json({
+    return res.json({
       page,
       limit,
       total,
-
-      totalPages:
-        Math.max(
-          Math.ceil(
-            total /
-            limit
-          ),
-          1
-        ),
-
+      totalPages,
       stats
     });
   } catch (error) {
@@ -1065,7 +1199,7 @@ async function listViewStats(
       error
     );
 
-    res
+    return res
       .status(500)
       .json({
         message:
@@ -1082,7 +1216,7 @@ async function createViewStat(
     const articleId =
       String(
         req.body.articleId || ""
-      );
+      ).trim();
 
     if (
       !mongoose.isValidObjectId(
@@ -1130,6 +1264,22 @@ async function createViewStat(
         });
     }
 
+    if (
+      req.body.views ===
+        undefined ||
+      req.body.views ===
+        null ||
+      req.body.views ===
+        ""
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Views are required"
+        });
+    }
+
     const views =
       Number(
         req.body.views
@@ -1158,7 +1308,7 @@ async function createViewStat(
         views
       });
 
-    res
+    return res
       .status(201)
       .json({
         message:
@@ -1219,6 +1369,22 @@ async function updateViewStat(
         });
     }
 
+    if (
+      req.body.views ===
+        undefined ||
+      req.body.views ===
+        null ||
+      req.body.views ===
+        ""
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Views are required"
+        });
+    }
+
     const views =
       Number(
         req.body.views
@@ -1243,7 +1409,7 @@ async function updateViewStat(
 
     await stat.save();
 
-    res.json({
+    return res.json({
       message:
         "ViewStat updated successfully"
     });
@@ -1290,7 +1456,7 @@ async function deleteViewStat(
 
     await stat.deleteOne();
 
-    res.json({
+    return res.json({
       message:
         "ViewStat deleted successfully"
     });
@@ -1300,7 +1466,7 @@ async function deleteViewStat(
       error
     );
 
-    res
+    return res
       .status(500)
       .json({
         message:

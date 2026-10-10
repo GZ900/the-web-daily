@@ -1,3 +1,6 @@
+const mongoose =
+  require("mongoose");
+
 const Article =
   require("../models/Article");
 
@@ -31,38 +34,54 @@ const PRESET_RANGES = {
 function getBucketConfig(
   duration
 ) {
-  if (duration <= 12 * HOUR) {
+  if (
+    duration <=
+    12 * HOUR
+  ) {
     return {
       unit: "minute",
       binSize: 5,
-      stepMs: 5 * MINUTE,
+      stepMs:
+        5 * MINUTE,
       bucketMinutes: 5
     };
   }
 
-  if (duration <= 24 * HOUR) {
+  if (
+    duration <=
+    24 * HOUR
+  ) {
     return {
       unit: "minute",
       binSize: 15,
-      stepMs: 15 * MINUTE,
+      stepMs:
+        15 * MINUTE,
       bucketMinutes: 15
     };
   }
 
-  if (duration <= 7 * DAY) {
+  if (
+    duration <=
+    7 * DAY
+  ) {
     return {
       unit: "hour",
       binSize: 1,
-      stepMs: HOUR,
+      stepMs:
+        HOUR,
       bucketMinutes: 60
     };
   }
 
-  if (duration <= 30 * DAY) {
+  if (
+    duration <=
+    30 * DAY
+  ) {
     return {
       unit: "hour",
       binSize: 6,
-      stepMs: 6 * HOUR,
+      stepMs:
+        6 * HOUR,
       bucketMinutes: 360
     };
   }
@@ -70,7 +89,8 @@ function getBucketConfig(
   return {
     unit: "day",
     binSize: 1,
-    stepMs: DAY,
+    stepMs:
+      DAY,
     bucketMinutes: 1440
   };
 }
@@ -83,11 +103,40 @@ function floorToBucket(
     Math.floor(
       date.getTime() /
       stepMs
-    ) * stepMs
+    ) *
+      stepMs
   );
 }
 
-function resolveTimeRange(req) {
+function getDateValue(value) {
+  const stringValue =
+    String(
+      value || ""
+    ).trim();
+
+  if (!stringValue) {
+    return null;
+  }
+
+  const date =
+    new Date(
+      stringValue
+    );
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return null;
+  }
+
+  return date;
+}
+
+function resolveTimeRange(
+  req
+) {
   const range =
     String(
       req.query.range ||
@@ -97,24 +146,22 @@ function resolveTimeRange(req) {
   const now =
     new Date();
 
-  if (range === "custom") {
+  if (
+    range === "custom"
+  ) {
     const start =
-      new Date(
+      getDateValue(
         req.query.start
       );
 
     const end =
-      new Date(
+      getDateValue(
         req.query.end
       );
 
     if (
-      Number.isNaN(
-        start.getTime()
-      ) ||
-      Number.isNaN(
-        end.getTime()
-      )
+      !start ||
+      !end
     ) {
       return {
         error:
@@ -122,7 +169,9 @@ function resolveTimeRange(req) {
       };
     }
 
-    if (start >= end) {
+    if (
+      start >= end
+    ) {
       return {
         error:
           "Start time must be before end time"
@@ -152,7 +201,9 @@ function resolveTimeRange(req) {
   }
 
   const duration =
-    PRESET_RANGES[range];
+    PRESET_RANGES[
+      range
+    ];
 
   if (!duration) {
     return {
@@ -163,12 +214,16 @@ function resolveTimeRange(req) {
 
   return {
     range,
+
     start:
       new Date(
         now.getTime() -
         duration
       ),
-    end: now,
+
+    end:
+      now,
+
     duration
   };
 }
@@ -184,16 +239,25 @@ async function getAnalyticsPage(
           $ne: null
         }
       })
+        .select(
+          [
+            "_id",
+            "publishedVersion.title",
+            "author",
+            "publishedAt"
+          ].join(" ")
+        )
         .populate(
           "author",
           "displayName"
         )
         .sort({
-          publishedAt: -1
+          publishedAt: -1,
+          _id: -1
         })
         .lean();
 
-    res.render(
+    return res.render(
       "editor/analytics",
       {
         pageTitle:
@@ -208,7 +272,7 @@ async function getAnalyticsPage(
       error
     );
 
-    res
+    return res
       .status(500)
       .send(
         "Internal Server Error"
@@ -221,10 +285,27 @@ async function getArticleAnalytics(
   res
 ) {
   try {
-    const timeRange =
-      resolveTimeRange(req);
+    if (
+      !mongoose.isValidObjectId(
+        req.params.id
+      )
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Invalid article ID"
+        });
+    }
 
-    if (timeRange.error) {
+    const timeRange =
+      resolveTimeRange(
+        req
+      );
+
+    if (
+      timeRange.error
+    ) {
       return res
         .status(400)
         .json({
@@ -235,12 +316,22 @@ async function getArticleAnalytics(
 
     const article =
       await Article.findOne({
-        _id: req.params.id,
+        _id:
+          req.params.id,
 
         publishedVersion: {
           $ne: null
         }
-      }).lean();
+      })
+        .select(
+          [
+            "_id",
+            "publishedVersion.title",
+            "totalViews",
+            "publicationHistory"
+          ].join(" ")
+        )
+        .lean();
 
     if (!article) {
       return res
@@ -256,7 +347,8 @@ async function getArticleAnalytics(
       start,
       end,
       duration
-    } = timeRange;
+    } =
+      timeRange;
 
     const bucket =
       getBucketConfig(
@@ -271,8 +363,11 @@ async function getArticleAnalytics(
               article._id,
 
             bucketStart: {
-              $gte: start,
-              $lte: end
+              $gte:
+                start,
+
+              $lte:
+                end
             }
           }
         },
@@ -340,29 +435,34 @@ async function getArticleAnalytics(
 
     for (
       let time =
-        firstBucket.getTime();
+        firstBucket
+          .getTime();
 
       time <=
-        lastBucket.getTime();
+      lastBucket
+        .getTime();
 
       time +=
-        bucket.stepMs
+      bucket.stepMs
     ) {
       points.push({
         time:
           new Date(time),
 
         views:
-          statMap.get(time) ||
-          0
+          statMap.get(
+            time
+          ) || 0
       });
     }
 
     const publicationHistory =
       Array.isArray(
-        article.publicationHistory
+        article
+          .publicationHistory
       )
-        ? article.publicationHistory
+        ? article
+            .publicationHistory
         : [];
 
     const publications =
@@ -373,7 +473,8 @@ async function getArticleAnalytics(
             index
           ) => ({
             time:
-              publication.publishedAt,
+              publication
+                .publishedAt,
 
             label:
               index === 0
@@ -401,7 +502,7 @@ async function getArticleAnalytics(
           }
         );
 
-    res.json({
+    return res.json({
       article: {
         id:
           article._id,
@@ -412,19 +513,19 @@ async function getArticleAnalytics(
             .title,
 
         totalViews:
-          article.totalViews
+          article.totalViews ||
+          0
       },
 
       range,
-
       start,
       end,
 
       bucketMinutes:
-        bucket.bucketMinutes,
+        bucket
+          .bucketMinutes,
 
       points,
-
       publications
     });
   } catch (error) {
@@ -433,7 +534,7 @@ async function getArticleAnalytics(
       error
     );
 
-    res
+    return res
       .status(500)
       .json({
         message:

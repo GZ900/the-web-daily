@@ -1,29 +1,46 @@
 const mongoose = require("mongoose");
 
-const viewStatSchema = new mongoose.Schema(
-  {
-    article: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Article",
-      required: true
-    },
+const viewStatSchema =
+  new mongoose.Schema(
+    {
+      article: {
+        type:
+          mongoose.Schema.Types
+            .ObjectId,
 
-    bucketStart: {
-      type: Date,
-      required: true
-    },
+        ref: "Article",
+        required: true
+      },
 
-    views: {
-      type: Number,
-      default: 0,
-      min: 0
+      bucketStart: {
+        type: Date,
+        required: true
+      },
+
+      views: {
+        type: Number,
+        default: 0,
+        min: 0,
+
+        validate: {
+          validator:
+            Number.isInteger,
+
+          message:
+            "Views must be an integer"
+        }
+      }
+    },
+    {
+      timestamps: true
     }
-  },
-  {
-    timestamps: true
-  }
-);
+  );
 
+/*
+  Prevent duplicate time buckets and
+  efficiently support analytics queries
+  for one article over a time range.
+*/
 viewStatSchema.index(
   {
     article: 1,
@@ -34,4 +51,8 @@ viewStatSchema.index(
   }
 );
 
-module.exports = mongoose.model("ViewStat", viewStatSchema);
+module.exports =
+  mongoose.model(
+    "ViewStat",
+    viewStatSchema
+  );

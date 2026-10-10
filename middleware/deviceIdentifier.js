@@ -1,41 +1,103 @@
-const crypto = require("crypto");
+const crypto =
+  require("crypto");
 
-function getCookie(req, cookieName) {
-  const cookieHeader = req.headers.cookie;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function readCookie(
+  req,
+  cookieName
+) {
+  const cookieHeader =
+    req.headers.cookie;
 
   if (!cookieHeader) {
     return null;
   }
 
-  const cookies = cookieHeader.split(";");
+  const cookies =
+    cookieHeader.split(";");
 
-  for (const cookie of cookies) {
-    const [name, ...valueParts] = cookie.trim().split("=");
+  for (
+    const cookie
+    of cookies
+  ) {
+    const [
+      name,
+      ...valueParts
+    ] =
+      cookie
+        .trim()
+        .split("=");
 
-    if (name === cookieName) {
-      return decodeURIComponent(valueParts.join("="));
+    if (
+      name !==
+      cookieName
+    ) {
+      continue;
+    }
+
+    const rawValue =
+      valueParts.join("=");
+
+    try {
+      return decodeURIComponent(
+        rawValue
+      );
+    } catch {
+      return null;
     }
   }
 
   return null;
 }
 
-function deviceIdentifier(req, res, next) {
-  let deviceId = getCookie(req, "webDailyDeviceId");
+function deviceIdentifier(
+  req,
+  res,
+  next
+) {
+  let deviceId =
+    readCookie(
+      req,
+      "webDailyDeviceId"
+    );
 
-  if (!deviceId) {
-    deviceId = crypto.randomUUID();
+  if (
+    !deviceId ||
+    !UUID_PATTERN.test(
+      deviceId
+    )
+  ) {
+    deviceId =
+      crypto.randomUUID();
 
-    res.cookie("webDailyDeviceId", deviceId, {
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 365 * 24 * 60 * 60 * 1000
-    });
+    res.cookie(
+      "webDailyDeviceId",
+      deviceId,
+      {
+        httpOnly: true,
+        sameSite: "lax",
+
+        secure:
+          process.env.NODE_ENV ===
+          "production",
+
+        maxAge:
+          365 *
+          24 *
+          60 *
+          60 *
+          1000
+      }
+    );
   }
 
-  req.deviceIdentifier = deviceId;
+  req.deviceIdentifier =
+    deviceId;
 
-  next();
+  return next();
 }
 
-module.exports = deviceIdentifier;
+module.exports =
+  deviceIdentifier;

@@ -1,3 +1,6 @@
+const mongoose =
+  require("mongoose");
+
 const Article =
   require("../models/Article");
 
@@ -15,7 +18,8 @@ function getFiveMinuteBucket() {
 
   const roundedMinutes =
     Math.floor(
-      bucket.getUTCMinutes() / 5
+      bucket.getUTCMinutes() /
+      5
     ) * 5;
 
   bucket.setUTCMinutes(
@@ -27,26 +31,99 @@ function getFiveMinuteBucket() {
   return bucket;
 }
 
-async function getArticle(req, res) {
+async function incrementViewStat(
+  articleId,
+  bucketStart
+) {
   try {
-    const article =
-      await Article.findOneAndUpdate(
-        {
-          _id: req.params.id,
+    await ViewStat.updateOne(
+      {
+        article:
+          articleId,
 
-          publishedVersion: {
-            $ne: null
-          }
+        bucketStart
+      },
+      {
+        $inc: {
+          views: 1
+        }
+      },
+      {
+        upsert: true
+      }
+    );
+  } catch (error) {
+    /*
+      Two readers may try to create
+      the same new bucket at exactly
+      the same time.
+
+      The unique compound index can
+      make one upsert receive E11000.
+      Retry it as a normal increment.
+    */
+    if (
+      error &&
+      error.code === 11000
+    ) {
+      await ViewStat.updateOne(
+        {
+          article:
+            articleId,
+
+          bucketStart
         },
         {
           $inc: {
-            totalViews: 1
+            views: 1
           }
-        },
-        {
-          new: true
         }
+      );
+
+      return;
+    }
+
+    throw error;
+  }
+}
+
+async function getArticle(
+  req,
+  res
+) {
+  try {
+    if (
+      !mongoose.isValidObjectId(
+        req.params.id
       )
+    ) {
+      return res
+        .status(400)
+        .send(
+          "Invalid article ID"
+        );
+    }
+
+    const article =
+      await Article
+        .findOneAndUpdate(
+          {
+            _id:
+              req.params.id,
+
+            publishedVersion: {
+              $ne: null
+            }
+          },
+          {
+            $inc: {
+              totalViews: 1
+            }
+          },
+          {
+            new: true
+          }
+        )
         .populate(
           "author",
           "displayName"
@@ -65,23 +142,16 @@ async function getArticle(req, res) {
       getFiveMinuteBucket();
 
     try {
-      await ViewStat.updateOne(
-        {
-          article:
-            article._id,
-
-          bucketStart
-        },
-        {
-          $inc: {
-            views: 1
-          }
-        },
-        {
-          upsert: true
-        }
+      await incrementViewStat(
+        article._id,
+        bucketStart
       );
     } catch (viewError) {
+      /*
+        Analytics failure should not
+        prevent the reader from seeing
+        the published article.
+      */
       console.error(
         "View statistics error:",
         viewError
@@ -98,7 +168,7 @@ async function getArticle(req, res) {
         })
         .lean();
 
-    res.render(
+    return res.render(
       "article",
       {
         pageTitle:
@@ -116,7 +186,7 @@ async function getArticle(req, res) {
       error
     );
 
-    res
+    return res
       .status(500)
       .send(
         "Internal Server Error"

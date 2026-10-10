@@ -9,6 +9,11 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <meta
+        name="color-scheme"
+        content="light dark"
+    >
+
     <title><%= pageTitle %></title>
 
     <link
@@ -19,6 +24,11 @@
     <link
         rel="stylesheet"
         href="/css/dashboard.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/analytics.css"
     >
 
     <script
@@ -32,211 +42,431 @@
     ></script>
 </head>
 
-<body>
+<body class="staff-page">
 
     <%- include("../partials/staffHeader", {
-        staffRole: "editor"
+        staffRole: "editor",
+        activeSection: "analytics"
     }) %>
 
-    <main>
+    <main class="dashboard-shell">
 
-        <h2>
-            Analytics Impact
-        </h2>
+        <header class="dashboard-page-heading">
+
+            <div>
+
+                <span class="dashboard-eyebrow">
+                    NEWSROOM INSIGHTS
+                </span>
+
+                <h1>
+                    Analytics Impact.
+                </h1>
+
+                <p>
+                    Explore readership over time
+                    and see how publication updates
+                    affect article performance.
+                </p>
+
+            </div>
+
+        </header>
 
         <% if (articles.length === 0) { %>
 
-            <p>
-                No published articles
-                are available.
-            </p>
+            <section class="dashboard-empty-state">
+
+                <h2>
+                    No published articles
+                </h2>
+
+                <p>
+                    Analytics will become available
+                    after an article is published.
+                </p>
+
+            </section>
 
         <% } else { %>
 
-            <section>
+            <section class="analytics-toolbar">
 
-                <label
-                    for="analytics-article"
-                >
-                    Article
-                </label>
+                <div class="analytics-toolbar-grid">
 
-                <select
-                    id="analytics-article"
-                >
+                    <label class="analytics-compact-field">
 
-                    <% articles.forEach(article => { %>
+                        <span class="analytics-field-label">
+                            Search
+                        </span>
 
-                        <option
-                            value="<%= article._id %>"
+                        <input
+                            type="search"
+                            id="analytics-article-search"
+                            placeholder="Search title..."
+                            autocomplete="off"
                         >
-                            <%= article.publishedVersion.title %>
-                            —
-                            <%= article.author.displayName %>
-                        </option>
 
-                    <% }) %>
+                    </label>
 
-                </select>
+                    <div class="analytics-compact-field">
 
-                <label
-                    for="analytics-range"
-                >
-                    Time range
-                </label>
+                        <span class="analytics-field-label">
+                            Reporter
+                        </span>
 
-                <select
-                    id="analytics-range"
-                >
+                        <div
+                            class="analytics-custom-select"
+                            id="reporter-custom-select"
+                        >
 
-                    <option value="30m">
-                        Last 30 minutes
-                    </option>
+                            <button
+                                type="button"
+                                class="analytics-select-button"
+                                id="analytics-reporter-button"
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                            >
 
-                    <option value="1h">
-                        Last hour
-                    </option>
+                                <span
+                                    class="analytics-select-value"
+                                    id="analytics-reporter-value"
+                                >
+                                    All Reporters
+                                </span>
 
-                    <option value="3h">
-                        Last 3 hours
-                    </option>
+                                <span
+                                    class="analytics-select-chevron"
+                                    aria-hidden="true"
+                                >
+                                    ⌄
+                                </span>
 
-                    <option value="6h">
-                        Last 6 hours
-                    </option>
+                            </button>
 
-                    <option value="12h">
-                        Last 12 hours
-                    </option>
+                            <div
+                                class="analytics-select-menu"
+                                id="analytics-reporter-menu"
+                                role="listbox"
+                                hidden
+                            ></div>
 
-                    <option value="24h">
-                        Last 24 hours
-                    </option>
+                        </div>
 
-                    <option
-                        value="7d"
-                        selected
-                    >
-                        Last 7 days
-                    </option>
+                        <select
+                            id="analytics-reporter"
+                            class="analytics-data-select"
+                            tabindex="-1"
+                            aria-hidden="true"
+                        >
 
-                    <option value="30d">
-                        Last 30 days
-                    </option>
+                            <option value="">
+                                All Reporters
+                            </option>
 
-                    <option value="90d">
-                        Last 90 days
-                    </option>
+                        </select>
 
-                    <option value="custom">
-                        Custom range
-                    </option>
+                    </div>
 
-                </select>
+                    <div class="analytics-compact-field analytics-article-field">
+
+                        <span class="analytics-field-label">
+                            Article
+                        </span>
+
+                        <div
+                            class="analytics-custom-select"
+                            id="article-custom-select"
+                        >
+
+                            <button
+                                type="button"
+                                class="analytics-select-button"
+                                id="analytics-article-button"
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                            >
+
+                                <span
+                                    class="analytics-select-value"
+                                    id="analytics-article-value"
+                                >
+                                    Choose an article
+                                </span>
+
+                                <span
+                                    class="analytics-select-chevron"
+                                    aria-hidden="true"
+                                >
+                                    ⌄
+                                </span>
+
+                            </button>
+
+                            <div
+                                class="analytics-select-menu analytics-article-menu"
+                                id="analytics-article-menu"
+                                role="listbox"
+                                hidden
+                            ></div>
+
+                        </div>
+
+                        <select
+                            id="analytics-article"
+                            class="analytics-data-select"
+                            tabindex="-1"
+                            aria-hidden="true"
+                        >
+
+                            <% articles.forEach(article => { %>
+
+                                <option
+                                    value="<%= article._id %>"
+                                    data-title="<%= article.publishedVersion.title %>"
+                                    data-reporter-id="<%= article.author ? article.author._id : "" %>"
+                                    data-reporter-name="<%= article.author ? article.author.displayName : "Unknown" %>"
+                                >
+                                    <%= article.publishedVersion.title %>
+                                    —
+                                    <%= article.author
+                                        ? article.author.displayName
+                                        : "Unknown" %>
+                                </option>
+
+                            <% }) %>
+
+                        </select>
+
+                    </div>
+
+                    <label class="analytics-compact-field">
+
+                        <span class="analytics-field-label">
+                            Time Range
+                        </span>
+
+                        <select
+                            id="analytics-range"
+                            class="analytics-native-select"
+                        >
+
+                            <option value="30m">
+                                Last 30 minutes
+                            </option>
+
+                            <option value="1h">
+                                Last hour
+                            </option>
+
+                            <option value="3h">
+                                Last 3 hours
+                            </option>
+
+                            <option value="6h">
+                                Last 6 hours
+                            </option>
+
+                            <option value="12h">
+                                Last 12 hours
+                            </option>
+
+                            <option value="24h">
+                                Last 24 hours
+                            </option>
+
+                            <option
+                                value="7d"
+                                selected
+                            >
+                                Last 7 days
+                            </option>
+
+                            <option value="30d">
+                                Last 30 days
+                            </option>
+
+                            <option value="90d">
+                                Last 90 days
+                            </option>
+
+                            <option value="custom">
+                                Custom range
+                            </option>
+
+                        </select>
+
+                    </label>
+
+                </div>
+
+                <p
+                    id="analytics-search-message"
+                    class="analytics-filter-message"
+                    aria-live="polite"
+                ></p>
 
             </section>
 
             <section
                 id="custom-range-controls"
+                class="custom-range-card"
                 hidden
             >
 
-                <h3>
-                    Custom Time Range
-                </h3>
+                <div>
 
-                <label
-                    for="analytics-start"
-                >
-                    From
-                </label>
+                    <span class="dashboard-eyebrow">
+                        CUSTOM RANGE
+                    </span>
 
-                <input
-                    type="datetime-local"
-                    id="analytics-start"
-                >
+                    <h2>
+                        Choose a time window
+                    </h2>
 
-                <label
-                    for="analytics-end"
-                >
-                    To
-                </label>
+                    <p>
+                        Custom ranges can cover
+                        up to 90 days.
+                    </p>
 
-                <input
-                    type="datetime-local"
-                    id="analytics-end"
-                >
+                </div>
 
-                <button
-                    type="button"
-                    id="apply-custom-range"
-                >
-                    Apply
-                </button>
+                <div class="custom-range-fields">
 
-                <p>
-                    Custom ranges can cover
-                    up to 90 days.
-                </p>
+                    <label class="dashboard-control">
 
-            </section>
+                        <span>
+                            From
+                        </span>
 
-            <section>
+                        <input
+                            type="datetime-local"
+                            id="analytics-start"
+                        >
 
-                <h3
-                    id="analytics-title"
-                >
-                    Loading analytics...
-                </h3>
+                    </label>
 
-                <p>
-                    Total article views
-                    (all time):
+                    <label class="dashboard-control">
 
-                    <strong
-                        id="analytics-total-views"
+                        <span>
+                            To
+                        </span>
+
+                        <input
+                            type="datetime-local"
+                            id="analytics-end"
+                        >
+
+                    </label>
+
+                    <button
+                        class="secondary-action"
+                        type="button"
+                        id="apply-custom-range"
                     >
-                        -
-                    </strong>
-                </p>
-
-                <p>
-                    Dates and times are shown
-                    in your local time using
-                    English 24-hour format.
-                </p>
-
-                <p
-                    id="analytics-message"
-                    aria-live="polite"
-                ></p>
-
-                <div
-                    style="
-                        position: relative;
-                        width: 100%;
-                        max-width: 1100px;
-                        height: 500px;
-                    "
-                >
-
-                    <canvas
-                        id="analytics-chart"
-                    ></canvas>
+                        Apply Range
+                    </button>
 
                 </div>
 
             </section>
 
-            <section>
+            <section class="analytics-overview">
 
-                <h3>
-                    Publication Events
-                </h3>
+                <div class="analytics-heading-card">
 
-                <div
-                    id="publication-events"
-                ></div>
+                    <div>
+
+                        <span class="analytics-card-label">
+                            Selected Article
+                        </span>
+
+                        <h2 id="analytics-title">
+                            Loading analytics...
+                        </h2>
+
+                    </div>
+
+                    <div class="analytics-total-card">
+
+                        <span>
+                            Total Views
+                        </span>
+
+                        <strong id="analytics-total-views">
+                            -
+                        </strong>
+
+                        <small>
+                            All time
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <p
+                    id="analytics-message"
+                    class="analytics-message"
+                    aria-live="polite"
+                ></p>
+
+                <section class="analytics-chart-card">
+
+                    <header class="analytics-section-header">
+
+                        <div>
+
+                            <span class="analytics-card-label">
+                                VIEW ACTIVITY
+                            </span>
+
+                            <h3>
+                                Views over time
+                            </h3>
+
+                        </div>
+
+                        <span class="analytics-time-note">
+                            Local time · 24-hour format
+                        </span>
+
+                    </header>
+
+                    <div class="analytics-chart-wrapper">
+
+                        <canvas
+                            id="analytics-chart"
+                        ></canvas>
+
+                    </div>
+
+                </section>
+
+                <section class="publication-card">
+
+                    <header class="analytics-section-header">
+
+                        <div>
+
+                            <span class="analytics-card-label">
+                                PUBLICATION HISTORY
+                            </span>
+
+                            <h3>
+                                Publication Events
+                            </h3>
+
+                        </div>
+
+                    </header>
+
+                    <div
+                        id="publication-events"
+                        class="publication-events"
+                    ></div>
+
+                </section>
 
             </section>
 

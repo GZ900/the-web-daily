@@ -1,25 +1,39 @@
 "use strict";
 
 const feed =
-  document.querySelector("#news-feed");
+  document.querySelector(
+    "#news-feed"
+  );
 
 const searchInput =
-  document.querySelector("#feed-search");
+  document.querySelector(
+    "#feed-search"
+  );
 
 const categorySelect =
-  document.querySelector("#feed-category");
+  document.querySelector(
+    "#feed-category"
+  );
 
 const viewedSelect =
-  document.querySelector("#feed-viewed");
+  document.querySelector(
+    "#feed-viewed"
+  );
 
 const sortSelect =
-  document.querySelector("#feed-sort");
+  document.querySelector(
+    "#feed-sort"
+  );
 
 const feedMessage =
-  document.querySelector("#feed-message");
+  document.querySelector(
+    "#feed-message"
+  );
 
 const sentinel =
-  document.querySelector("#feed-sentinel");
+  document.querySelector(
+    "#feed-sentinel"
+  );
 
 if (
   feed &&
@@ -30,12 +44,41 @@ if (
   sentinel
 ) {
   let currentPage = 2;
-  let loading = false;
+
+  let loading =
+    false;
 
   let hasMore =
-    feed.querySelectorAll(".news-card").length >= 20;
+    feed.querySelectorAll(
+      ".news-card"
+    ).length >= 20;
 
-  let searchTimer = null;
+  let searchTimer =
+    null;
+
+  const dateFormatter =
+    new Intl.DateTimeFormat(
+      "en-GB",
+      {
+        day:
+          "2-digit",
+
+        month:
+          "short",
+
+        year:
+          "numeric",
+
+        hour:
+          "2-digit",
+
+        minute:
+          "2-digit",
+
+        hour12:
+          false
+      }
+    );
 
   function getViewedArticles() {
     try {
@@ -49,9 +92,13 @@ if (
       }
 
       const parsed =
-        JSON.parse(value);
+        JSON.parse(
+          value
+        );
 
-      return Array.isArray(parsed)
+      return Array.isArray(
+        parsed
+      )
         ? parsed
         : [];
     } catch (error) {
@@ -66,43 +113,64 @@ if (
       );
 
     const search =
-      params.get("search") || "";
+      params.get(
+        "search"
+      ) || "";
 
     const category =
-      params.get("category") || "";
+      params.get(
+        "category"
+      ) || "";
 
     const viewed =
-      params.get("viewed") || "all";
+      params.get(
+        "viewed"
+      ) || "all";
 
     const sort =
-      params.get("sort") || "newest";
+      params.get(
+        "sort"
+      ) || "newest";
 
-    searchInput.value = search;
+    searchInput.value =
+      search;
 
     const categoryExists =
       Array.from(
         categorySelect.options
       ).some(
         option =>
-          option.value === category
+          option.value ===
+          category
       );
 
-    if (categoryExists) {
+    if (
+      categoryExists
+    ) {
       categorySelect.value =
         category;
     }
 
     if (
-      ["all", "viewed", "unviewed"]
-        .includes(viewed)
+      [
+        "all",
+        "viewed",
+        "unviewed"
+      ].includes(
+        viewed
+      )
     ) {
       viewedSelect.value =
         viewed;
     }
 
     if (
-      ["newest", "popular"]
-        .includes(sort)
+      [
+        "newest",
+        "popular"
+      ].includes(
+        sort
+      )
     ) {
       sortSelect.value =
         sort;
@@ -121,7 +189,8 @@ if (
       new URLSearchParams();
 
     const search =
-      searchInput.value.trim();
+      searchInput.value
+        .trim();
 
     const category =
       categorySelect.value;
@@ -146,14 +215,18 @@ if (
       );
     }
 
-    if (viewed !== "all") {
+    if (
+      viewed !== "all"
+    ) {
       params.set(
         "viewed",
         viewed
       );
     }
 
-    if (sort !== "newest") {
+    if (
+      sort !== "newest"
+    ) {
       params.set(
         "sort",
         sort
@@ -186,7 +259,8 @@ if (
 
     params.set(
       "search",
-      searchInput.value.trim()
+      searchInput.value
+        .trim()
     );
 
     params.set(
@@ -207,7 +281,9 @@ if (
     const viewedIds =
       getViewedArticles();
 
-    if (viewedIds.length > 0) {
+    if (
+      viewedIds.length > 0
+    ) {
       params.set(
         "viewedIds",
         viewedIds.join(",")
@@ -229,16 +305,40 @@ if (
       );
 
     card.className =
-      "news-card";
+      article.imageUrl
+        ? "news-card"
+        : "news-card news-card--no-image";
 
     card.dataset.articleId =
       article.id;
 
     if (article.imageUrl) {
+      const imageLink =
+        document.createElement(
+          "a"
+        );
+
+      imageLink.className =
+        "news-card-image-link";
+
+      imageLink.href =
+        `/articles/${article.id}`;
+
+      imageLink.tabIndex =
+        -1;
+
+      imageLink.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
       const image =
         document.createElement(
           "img"
         );
+
+      image.className =
+        "news-card-image";
 
       image.src =
         article.imageUrl;
@@ -249,28 +349,76 @@ if (
       image.loading =
         "lazy";
 
-      card.append(image);
+      image.addEventListener(
+        "error",
+        function () {
+          imageLink.remove();
+
+          card.classList.add(
+            "news-card--no-image"
+          );
+        }
+      );
+
+      imageLink.append(
+        image
+      );
+
+      card.append(
+        imageLink
+      );
     }
+
+    const content =
+      document.createElement(
+        "div"
+      );
+
+    content.className =
+      "news-card-content";
+
+    const topline =
+      document.createElement(
+        "div"
+      );
+
+    topline.className =
+      "news-card-topline";
 
     const category =
       document.createElement(
-        "p"
+        "span"
       );
 
-    const strong =
-      document.createElement(
-        "strong"
-      );
+    category.className =
+      "news-category";
 
-    strong.textContent =
+    category.textContent =
       article.category;
 
-    category.append(strong);
+    const views =
+      document.createElement(
+        "span"
+      );
+
+    views.className =
+      "news-views";
+
+    views.textContent =
+      `${article.totalViews || 0} views`;
+
+    topline.append(
+      category,
+      views
+    );
 
     const heading =
       document.createElement(
-        "h3"
+        "h2"
       );
+
+    heading.className =
+      "news-card-title";
 
     const link =
       document.createElement(
@@ -283,40 +431,94 @@ if (
     link.textContent =
       article.title;
 
-    heading.append(link);
+    heading.append(
+      link
+    );
 
     const summary =
       document.createElement(
         "p"
       );
 
+    summary.className =
+      "news-card-summary";
+
     summary.textContent =
       article.summary;
 
+    const footer =
+      document.createElement(
+        "footer"
+      );
+
+    footer.className =
+      "news-card-footer";
+
     const author =
       document.createElement(
-        "p"
+        "span"
       );
 
-    author.textContent =
-      `By ${article.author}`;
+    author.className =
+      "news-author";
 
-    const date =
+    author.append(
+      document.createTextNode(
+        "By "
+      )
+    );
+
+    const authorName =
       document.createElement(
-        "p"
+        "strong"
       );
 
-    date.textContent =
+    authorName.textContent =
+      article.author ||
+      "Unknown";
+
+    author.append(
+      authorName
+    );
+
+    const time =
+      document.createElement(
+        "time"
+      );
+
+    const publishedDate =
       new Date(
         article.publishedAt
-      ).toLocaleString();
+      );
 
-    card.append(
-      category,
+    if (
+      !Number.isNaN(
+        publishedDate.getTime()
+      )
+    ) {
+      time.dateTime =
+        publishedDate.toISOString();
+
+      time.textContent =
+        dateFormatter.format(
+          publishedDate
+        );
+    }
+
+    footer.append(
+      author,
+      time
+    );
+
+    content.append(
+      topline,
       heading,
       summary,
-      author,
-      date
+      footer
+    );
+
+    card.append(
+      content
     );
 
     return card;
@@ -329,16 +531,25 @@ if (
       return;
     }
 
-    if (!hasMore && !reset) {
+    if (
+      !hasMore &&
+      !reset
+    ) {
       return;
     }
 
-    loading = true;
+    loading =
+      true;
 
     if (reset) {
-      currentPage = 1;
-      hasMore = true;
-      feed.innerHTML = "";
+      currentPage =
+        1;
+
+      hasMore =
+        true;
+
+      feed.innerHTML =
+        "";
     }
 
     feedMessage.textContent =
@@ -347,7 +558,9 @@ if (
     try {
       const response =
         await fetch(
-          buildUrl(currentPage)
+          buildUrl(
+            currentPage
+          )
         );
 
       const data =
@@ -380,12 +593,16 @@ if (
       ) {
         feedMessage.textContent =
           "No articles found.";
+      } else if (!hasMore) {
+        feedMessage.textContent =
+          "";
       } else {
         feedMessage.textContent =
           "";
       }
 
-      currentPage += 1;
+      currentPage +=
+        1;
     } catch (error) {
       console.error(
         "Feed request error:",
@@ -395,7 +612,8 @@ if (
       feedMessage.textContent =
         "Unable to connect to the server";
     } finally {
-      loading = false;
+      loading =
+        false;
     }
   }
 
@@ -460,7 +678,8 @@ if (
         }
       },
       {
-        rootMargin: "300px"
+        rootMargin:
+          "300px"
       }
     );
 

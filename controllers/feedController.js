@@ -1,43 +1,143 @@
-const mongoose = require("mongoose");
-const Article = require("../models/Article");
+const mongoose =
+  require("mongoose");
+
+const Article =
+  require("../models/Article");
 
 require("../models/User");
 
 const PAGE_SIZE = 20;
+const MAX_PAGE = 10000;
+const MAX_SEARCH_LENGTH = 200;
+const MAX_CATEGORY_LENGTH = 80;
+
+const VALID_SORTS = [
+  "newest",
+  "popular"
+];
+
+const VALID_VIEWED_FILTERS = [
+  "all",
+  "viewed",
+  "unviewed"
+];
 
 function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return value.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&"
+  );
 }
 
-async function getFeedArticles(req, res) {
-  try {
-    const page = Math.max(
-      Number.parseInt(req.query.page, 10) || 1,
-      1
+function getPage(value) {
+  const parsed =
+    Number.parseInt(
+      value,
+      10
     );
 
-    const search = String(
-      req.query.search || ""
-    ).trim();
+  if (
+    !Number.isFinite(parsed) ||
+    parsed < 1
+  ) {
+    return 1;
+  }
 
-    const category = String(
-      req.query.category || ""
-    ).trim();
+  return Math.min(
+    parsed,
+    MAX_PAGE
+  );
+}
 
-    const sort = String(
-      req.query.sort || "newest"
+function getLimitedText(
+  value,
+  maxLength
+) {
+  return String(
+    value || ""
+  )
+    .trim()
+    .slice(
+      0,
+      maxLength
     );
+}
 
-    const viewed = String(
-      req.query.viewed || "all"
-    );
-
-    const viewedIds = String(
-      req.query.viewedIds || ""
+function getViewedIds(value) {
+  const rawIds =
+    String(
+      value || ""
     )
       .split(",")
-      .filter(id =>
-        mongoose.isValidObjectId(id)
+      .map(
+        id => id.trim()
+      )
+      .filter(Boolean);
+
+  const validIds =
+    rawIds.filter(
+      id =>
+        mongoose.isValidObjectId(
+          id
+        )
+    );
+
+  return [
+    ...new Set(validIds)
+  ];
+}
+
+async function getFeedArticles(
+  req,
+  res
+) {
+  try {
+    const page =
+      getPage(
+        req.query.page
+      );
+
+    const search =
+      getLimitedText(
+        req.query.search,
+        MAX_SEARCH_LENGTH
+      );
+
+    const category =
+      getLimitedText(
+        req.query.category,
+        MAX_CATEGORY_LENGTH
+      );
+
+    const requestedSort =
+      String(
+        req.query.sort ||
+        "newest"
+      );
+
+    const sort =
+      VALID_SORTS.includes(
+        requestedSort
+      )
+        ? requestedSort
+        : "newest";
+
+    const requestedViewed =
+      String(
+        req.query.viewed ||
+        "all"
+      );
+
+    const viewed =
+      VALID_VIEWED_FILTERS.includes(
+        requestedViewed
+      )
+        ? requestedViewed
+        : "all";
+
+    const viewedIds =
+      getViewedIds(
+        req.query.viewedIds
       );
 
     const filter = {
@@ -47,19 +147,28 @@ async function getFeedArticles(req, res) {
     };
 
     if (search) {
-      filter["publishedVersion.title"] = {
-        $regex: escapeRegex(search),
+      filter[
+        "publishedVersion.title"
+      ] = {
+        $regex:
+          escapeRegex(search),
+
         $options: "i"
       };
     }
 
     if (category) {
-      filter["publishedVersion.category"] =
-        category;
+      filter[
+        "publishedVersion.category"
+      ] = category;
     }
 
-    if (viewed === "viewed") {
-      if (viewedIds.length === 0) {
+    if (
+      viewed === "viewed"
+    ) {
+      if (
+        viewedIds.length === 0
+      ) {
         return res.json({
           articles: [],
           hasMore: false
@@ -84,28 +193,51 @@ async function getFeedArticles(req, res) {
       sort === "popular"
         ? {
             totalViews: -1,
-            publishedAt: -1
+            publishedAt: -1,
+            _id: -1
           }
         : {
-            publishedAt: -1
+            publishedAt: -1,
+            _id: -1
           };
 
-    const articles = await Article.find(
-      filter
-    )
-      .populate(
-        "author",
-        "displayName"
+    const articles =
+      await Article.find(
+        filter
       )
-      .sort(sortOption)
-      .skip(
-        (page - 1) * PAGE_SIZE
-      )
-      .limit(PAGE_SIZE + 1)
-      .lean();
+        .select(
+          [
+            "_id",
+            "publishedVersion.title",
+            "publishedVersion.summary",
+            "publishedVersion.category",
+            "publishedVersion.imageUrl",
+            "author",
+            "publishedAt",
+            "totalViews"
+          ].join(" ")
+        )
+        .populate(
+          "author",
+          "displayName"
+        )
+        .sort(
+          sortOption
+        )
+        .skip(
+          (
+            page - 1
+          ) *
+          PAGE_SIZE
+        )
+        .limit(
+          PAGE_SIZE + 1
+        )
+        .lean();
 
     const hasMore =
-      articles.length > PAGE_SIZE;
+      articles.length >
+      PAGE_SIZE;
 
     const pageArticles =
       articles.slice(
@@ -113,26 +245,46 @@ async function getFeedArticles(req, res) {
         PAGE_SIZE
       );
 
-    res.json({
-      articles: pageArticles.map(
-        article => ({
-          id: article._id,
-          title:
-            article.publishedVersion.title,
-          summary:
-            article.publishedVersion.summary,
-          category:
-            article.publishedVersion.category,
-          imageUrl:
-            article.publishedVersion.imageUrl,
-          author:
-            article.author.displayName,
-          publishedAt:
-            article.publishedAt,
-          totalViews:
-            article.totalViews
-        })
-      ),
+    return res.json({
+      articles:
+        pageArticles.map(
+          article => ({
+            id:
+              article._id,
+
+            title:
+              article
+                .publishedVersion
+                .title,
+
+            summary:
+              article
+                .publishedVersion
+                .summary,
+
+            category:
+              article
+                .publishedVersion
+                .category,
+
+            imageUrl:
+              article
+                .publishedVersion
+                .imageUrl,
+
+            author:
+              article.author
+                ?.displayName ||
+              "Unknown",
+
+            publishedAt:
+              article.publishedAt,
+
+            totalViews:
+              article.totalViews ||
+              0
+          })
+        ),
 
       hasMore
     });
@@ -142,10 +294,12 @@ async function getFeedArticles(req, res) {
       error
     );
 
-    res.status(500).json({
-      message:
-        "Unable to load articles"
-    });
+    return res
+      .status(500)
+      .json({
+        message:
+          "Unable to load articles"
+      });
   }
 }
 

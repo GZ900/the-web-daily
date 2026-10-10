@@ -15,6 +15,19 @@ const User =
 
 const PAGE_SIZE = 25;
 
+const MAX_SEARCH_LENGTH = 200;
+
+const MAX_EDITOR_NOTE_LENGTH =
+  1000;
+
+const ARTICLE_LIMITS = {
+  title: 200,
+  summary: 600,
+  content: 50000,
+  category: 80,
+  imageUrl: 2048
+};
+
 const VALID_STATUSES = [
   "draft",
   "pending",
@@ -36,9 +49,18 @@ function escapeRegex(value) {
   );
 }
 
-function getEditorSort(
-  sort
-) {
+function getSearchValue(value) {
+  return String(
+    value || ""
+  )
+    .trim()
+    .slice(
+      0,
+      MAX_SEARCH_LENGTH
+    );
+}
+
+function getEditorSort(sort) {
   if (
     sort ===
     "published_desc"
@@ -118,15 +140,170 @@ function buildPaginationQuery({
   return params.toString();
 }
 
+function getArticleInput(body) {
+  return {
+    title:
+      String(
+        body.title || ""
+      ).trim(),
+
+    summary:
+      String(
+        body.summary || ""
+      ).trim(),
+
+    content:
+      String(
+        body.content || ""
+      ),
+
+    category:
+      String(
+        body.category || ""
+      ).trim(),
+
+    imageUrl:
+      String(
+        body.imageUrl || ""
+      ).trim()
+  };
+}
+
+function isValidImageUrl(
+  imageUrl
+) {
+  if (!imageUrl) {
+    return true;
+  }
+
+  if (
+    imageUrl.startsWith("/")
+  ) {
+    return true;
+  }
+
+  try {
+    const parsedUrl =
+      new URL(
+        imageUrl
+      );
+
+    return [
+      "http:",
+      "https:"
+    ].includes(
+      parsedUrl.protocol
+    );
+  } catch {
+    return false;
+  }
+}
+
+function validateArticleInput(
+  input,
+  {
+    requireCoreFields = false
+  } = {}
+) {
+  if (
+    input.title.length >
+    ARTICLE_LIMITS.title
+  ) {
+    return "Title is too long";
+  }
+
+  if (
+    input.summary.length >
+    ARTICLE_LIMITS.summary
+  ) {
+    return "Summary is too long";
+  }
+
+  if (
+    input.content.length >
+    ARTICLE_LIMITS.content
+  ) {
+    return "Article content is too long";
+  }
+
+  if (
+    input.category.length >
+    ARTICLE_LIMITS.category
+  ) {
+    return "Category is too long";
+  }
+
+  if (
+    input.imageUrl.length >
+    ARTICLE_LIMITS.imageUrl
+  ) {
+    return "Image URL is too long";
+  }
+
+  if (
+    !isValidImageUrl(
+      input.imageUrl
+    )
+  ) {
+    return "Image URL must be a valid HTTP, HTTPS or local URL";
+  }
+
+  if (
+    requireCoreFields &&
+    (
+      !input.title ||
+      !input.summary ||
+      !input.content.trim() ||
+      !input.category
+    )
+  ) {
+    return "Title, summary, content and category are required";
+  }
+
+  return null;
+}
+
+function handleApiError(
+  error,
+  res,
+  logMessage,
+  clientMessage
+) {
+  if (
+    error &&
+    error.name ===
+    "ValidationError"
+  ) {
+    return res
+      .status(400)
+      .json({
+        message:
+          error.message
+      });
+  }
+
+  console.error(
+    logMessage,
+    error
+  );
+
+  return res
+    .status(500)
+    .json({
+      message:
+        clientMessage
+    });
+}
+
 async function getDashboard(
   req,
   res
 ) {
   try {
     const search =
-      String(
-        req.query.search || ""
-      ).trim();
+      getSearchValue(
+        req.query.search
+      );
 
     const requestedStatus =
       String(
@@ -191,7 +368,9 @@ async function getDashboard(
         "workingVersion.title"
       ] = {
         $regex:
-          escapeRegex(search),
+          escapeRegex(
+            search
+          ),
 
         $options: "i"
       };
@@ -247,7 +426,9 @@ async function getDashboard(
           )
         )
         .skip(
-          (page - 1) *
+          (
+            page - 1
+          ) *
           PAGE_SIZE
         )
         .limit(
@@ -263,7 +444,7 @@ async function getDashboard(
         sort
       });
 
-    res.render(
+    return res.render(
       "editor/dashboard",
       {
         pageTitle:
@@ -299,7 +480,7 @@ async function getDashboard(
       error
     );
 
-    res
+    return res
       .status(500)
       .send(
         "Internal Server Error"
@@ -312,6 +493,18 @@ async function getReviewArticle(
   res
 ) {
   try {
+    if (
+      !mongoose.isValidObjectId(
+        req.params.id
+      )
+    ) {
+      return res
+        .status(400)
+        .send(
+          "Invalid article ID"
+        );
+    }
+
     const article =
       await Article.findById(
         req.params.id
@@ -329,7 +522,7 @@ async function getReviewArticle(
         );
     }
 
-    res.render(
+    return res.render(
       "editor/review",
       {
         pageTitle:
@@ -344,7 +537,7 @@ async function getReviewArticle(
       error
     );
 
-    res
+    return res
       .status(500)
       .send(
         "Internal Server Error"
@@ -357,24 +550,76 @@ async function updateArticle(
   res
 ) {
   try {
-    const article =
-      await Article.findById(
+    if (
+      !mongoose.isValidObjectId(
         req.params.id
-      );
-
-    if (!article) {
+      )
+    ) {
       return res
-        .status(404)
+        .status(400)
         .json({
           message:
-            "Article not found"
+            "Invalid article ID"
         });
     }
 
+    const input =
+      getArticleInput(
+        req.body
+      );
+
+    const validationError =
+      validateArticleInput(
+        input
+      );
+
+    if (validationError) {
+      return res
+        .status(400)
+        .json({
+          message:
+            validationError
+        });
+    }
+
+    const result =
+      await Article.updateOne(
+        {
+          _id:
+            req.params.id,
+
+          status:
+            "pending"
+        },
+        {
+          $set: {
+            workingVersion:
+              input
+          }
+        },
+        {
+          runValidators: true
+        }
+      );
+
     if (
-      article.status !==
-      "pending"
+      result.matchedCount === 0
     ) {
+      const exists =
+        await Article.exists({
+          _id:
+            req.params.id
+        });
+
+      if (!exists) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "Article not found"
+          });
+      }
+
       return res
         .status(409)
         .json({
@@ -383,67 +628,17 @@ async function updateArticle(
         });
     }
 
-    const {
-      title,
-      summary,
-      content,
-      category,
-      imageUrl
-    } = req.body;
-
-    article
-      .workingVersion
-      .title =
-        String(
-          title || ""
-        ).trim();
-
-    article
-      .workingVersion
-      .summary =
-        String(
-          summary || ""
-        ).trim();
-
-    article
-      .workingVersion
-      .content =
-        String(
-          content || ""
-        );
-
-    article
-      .workingVersion
-      .category =
-        String(
-          category || ""
-        ).trim();
-
-    article
-      .workingVersion
-      .imageUrl =
-        String(
-          imageUrl || ""
-        ).trim();
-
-    await article.save();
-
-    res.json({
+    return res.json({
       message:
         "Article changes saved"
     });
   } catch (error) {
-    console.error(
+    return handleApiError(
+      error,
+      res,
       "Editor update error:",
-      error
+      "Unable to save article"
     );
-
-    res
-      .status(500)
-      .json({
-        message:
-          "Unable to save article"
-      });
   }
 }
 
@@ -452,10 +647,26 @@ async function approveArticle(
   res
 ) {
   try {
+    if (
+      !mongoose.isValidObjectId(
+        req.params.id
+      )
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Invalid article ID"
+        });
+    }
+
     const article =
       await Article.findById(
         req.params.id
-      );
+      )
+        .select(
+          "status workingVersion publishedAt updatedAt"
+        );
 
     if (!article) {
       return res
@@ -481,21 +692,7 @@ async function approveArticle(
     const version =
       article.workingVersion;
 
-    if (
-      !version.title ||
-      !version.summary ||
-      !version.content ||
-      !version.category
-    ) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Title, summary, content and category are required"
-        });
-    }
-
-    article.publishedVersion = {
+    const input = {
       title:
         version.title,
 
@@ -512,50 +709,109 @@ async function approveArticle(
         version.imageUrl
     };
 
+    const validationError =
+      validateArticleInput(
+        input,
+        {
+          requireCoreFields:
+            true
+        }
+      );
+
+    if (validationError) {
+      return res
+        .status(400)
+        .json({
+          message:
+            validationError
+        });
+    }
+
     const publishTime =
       new Date();
+
+    const setFields = {
+      publishedVersion: {
+        title:
+          input.title,
+
+        summary:
+          input.summary,
+
+        content:
+          input.content,
+
+        category:
+          input.category,
+
+        imageUrl:
+          input.imageUrl
+      },
+
+      status:
+        "published",
+
+      editorNote:
+        ""
+    };
 
     if (
       !article.publishedAt
     ) {
-      article.publishedAt =
+      setFields.publishedAt =
         publishTime;
     }
 
-    article
-      .publicationHistory
-      .push({
-        publishedAt:
-          publishTime,
+    const result =
+      await Article.updateOne(
+        {
+          _id:
+            article._id,
 
-        editor:
-          req.user._id
-      });
+          status:
+            "pending",
 
-    article.status =
-      "published";
+          updatedAt:
+            article.updatedAt
+        },
+        {
+          $set:
+            setFields,
 
-    article.editorNote =
-      "";
+          $push: {
+            publicationHistory: {
+              publishedAt:
+                publishTime,
 
-    await article.save();
+              editor:
+                req.user._id
+            }
+          }
+        }
+      );
 
-    res.json({
+    if (
+      result.modifiedCount !== 1
+    ) {
+      return res
+        .status(409)
+        .json({
+          message:
+            "The article changed while it was being approved. Refresh and try again."
+        });
+    }
+
+    return res.json({
       message:
         "Article published successfully"
     });
   } catch (error) {
-    console.error(
+    return handleApiError(
+      error,
+      res,
       "Approve article error:",
-      error
+      "Unable to publish article"
     );
-
-    res
-      .status(500)
-      .json({
-        message:
-          "Unable to publish article"
-      });
   }
 }
 
@@ -564,29 +820,16 @@ async function returnArticle(
   res
 ) {
   try {
-    const article =
-      await Article.findById(
-        req.params.id
-      );
-
-    if (!article) {
-      return res
-        .status(404)
-        .json({
-          message:
-            "Article not found"
-        });
-    }
-
     if (
-      article.status !==
-      "pending"
+      !mongoose.isValidObjectId(
+        req.params.id
+      )
     ) {
       return res
-        .status(409)
+        .status(400)
         .json({
           message:
-            "Only pending articles can be returned"
+            "Invalid article ID"
         });
     }
 
@@ -604,30 +847,78 @@ async function returnArticle(
         });
     }
 
-    article.status =
-      "returned";
+    if (
+      note.length >
+      MAX_EDITOR_NOTE_LENGTH
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Editor note is too long"
+        });
+    }
 
-    article.editorNote =
-      note;
+    const result =
+      await Article.updateOne(
+        {
+          _id:
+            req.params.id,
 
-    await article.save();
+          status:
+            "pending"
+        },
+        {
+          $set: {
+            status:
+              "returned",
 
-    res.json({
+            editorNote:
+              note
+          }
+        },
+        {
+          runValidators: true
+        }
+      );
+
+    if (
+      result.matchedCount === 0
+    ) {
+      const exists =
+        await Article.exists({
+          _id:
+            req.params.id
+        });
+
+      if (!exists) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "Article not found"
+          });
+      }
+
+      return res
+        .status(409)
+        .json({
+          message:
+            "Only pending articles can be returned"
+        });
+    }
+
+    return res.json({
       message:
         "Article returned to reporter"
     });
   } catch (error) {
-    console.error(
+    return handleApiError(
+      error,
+      res,
       "Return article error:",
-      error
+      "Unable to return article"
     );
-
-    res
-      .status(500)
-      .json({
-        message:
-          "Unable to return article"
-      });
   }
 }
 
@@ -636,8 +927,28 @@ async function deleteArticle(
   res
 ) {
   try {
+    if (
+      !mongoose.isValidObjectId(
+        req.params.id
+      )
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Invalid article ID"
+        });
+    }
+
+    /*
+      Delete the article first.
+
+      Once it no longer exists,
+      new public views/comments
+      cannot be created for it.
+    */
     const article =
-      await Article.findById(
+      await Article.findByIdAndDelete(
         req.params.id
       );
 
@@ -662,9 +973,7 @@ async function deleteArticle(
       })
     ]);
 
-    await article.deleteOne();
-
-    res.json({
+    return res.json({
       message:
         "Article deleted successfully"
     });
@@ -674,7 +983,7 @@ async function deleteArticle(
       error
     );
 
-    res
+    return res
       .status(500)
       .json({
         message:

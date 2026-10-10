@@ -9,6 +9,11 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <meta
+        name="color-scheme"
+        content="light dark"
+    >
+
     <title><%= pageTitle %></title>
 
     <link
@@ -21,200 +26,417 @@
         href="/css/weather.css"
     >
 
-    <link
-        rel="stylesheet"
-        href="/css/dashboard.css"
-    >
-
     <script
         src="/js/feed.js"
         defer
     ></script>
 </head>
 
-<body>
+<body class="home-page">
 
-    <header class="dashboard-header">
+    <%- include("partials/staffHeader", {
+        activeSection: "home"
+    }) %>
 
-        <h1>
-            The Web Daily
-        </h1>
+    <main class="home-shell">
 
-        <div class="dashboard-header-actions">
+        <header class="feed-heading">
 
-            <nav>
+            <span class="section-eyebrow">
+                THE WEB DAILY
+            </span>
 
-                <a href="/">
-                    Home
-                </a>
+            <h1 id="latest-news-heading">
+                News for the
+                digital world.
+            </h1>
 
-                <% if (!currentUser) { %>
+            <p class="feed-introduction">
+                The latest stories from our
+                newsroom, organised in one
+                clean and simple place.
+            </p>
 
-                    <a href="/login">
-                        Staff Login
-                    </a>
+        </header>
 
-                <% } else if (currentUser.role === "reporter") { %>
+        <section
+            class="weather-widget"
+            aria-label="Weather"
+        >
 
-                    <a href="/reporter">
-                        Reporter Dashboard
-                    </a>
+            <% if (weather) { %>
 
-                <% } else if (currentUser.role === "editor") { %>
+                <div class="weather-location-block">
 
-                    <a href="/editor">
-                        Editor Dashboard
-                    </a>
+                    <div class="weather-live-row">
 
-                <% } %>
+                        <span
+                            class="weather-status-dot"
+                            aria-hidden="true"
+                        ></span>
 
-            </nav>
+                        <span class="weather-kicker">
+                            Live Weather
+                        </span>
 
-            <% if (currentUser) { %>
+                    </div>
 
-                <form
-                    method="POST"
-                    action="/logout"
-                >
-                    <button type="submit">
-                        Logout
-                    </button>
-                </form>
+                    <h2>
+                        <%= weather.location %>
+                    </h2>
+
+                    <p class="weather-description">
+                        <%= weather.description %>
+                    </p>
+
+                </div>
+
+                <div class="weather-current">
+
+                    <span class="weather-temperature">
+                        <%= Math.round(weather.temperature) %>°
+                    </span>
+
+                    <span class="weather-unit">
+                        C
+                    </span>
+
+                </div>
+
+                <dl class="weather-details">
+
+                    <div>
+
+                        <dt>
+                            Feels like
+                        </dt>
+
+                        <dd>
+                            <%= Math.round(weather.apparentTemperature) %>°
+                        </dd>
+
+                    </div>
+
+                    <div>
+
+                        <dt>
+                            Humidity
+                        </dt>
+
+                        <dd>
+                            <%= weather.humidity %>%
+                        </dd>
+
+                    </div>
+
+                    <div>
+
+                        <dt>
+                            Wind
+                        </dt>
+
+                        <dd>
+                            <%= Math.round(weather.windSpeed) %>
+                            km/h
+                        </dd>
+
+                    </div>
+
+                    <div>
+
+                        <dt>
+                            Rain
+                        </dt>
+
+                        <dd>
+                            <%= weather.precipitation %>
+                            mm
+                        </dd>
+
+                    </div>
+
+                </dl>
+
+                <div class="weather-footer">
+
+                    <% if (weather.stale) { %>
+
+                        <span class="weather-warning">
+                            Showing the most recent available data.
+                        </span>
+
+                    <% } %>
+
+                    <span class="weather-source">
+
+                        Powered by
+
+                        <a
+                            href="https://open-meteo.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Open-Meteo
+                        </a>
+
+                    </span>
+
+                </div>
+
+            <% } else { %>
+
+                <p class="weather-unavailable">
+                    Weather information is
+                    temporarily unavailable.
+                </p>
 
             <% } %>
 
-        </div>
+        </section>
 
-    </header>
+        <section
+            class="feed-column"
+            aria-labelledby="latest-news-heading"
+        >
 
-    <main class="home-layout">
+            <section
+                class="feed-controls-panel"
+                aria-label="News controls"
+            >
 
-        <section class="feed-column">
+                <div
+                    id="feed-controls"
+                    class="feed-controls"
+                >
 
-            <h2>
-                Latest News
-            </h2>
-
-            <div id="feed-controls">
-
-                <label>
-                    Search
-
-                    <input
-                        type="search"
-                        id="feed-search"
-                        placeholder="Search by title"
+                    <label
+                        class="
+                            feed-control
+                            feed-control-search
+                        "
+                        for="feed-search"
                     >
-                </label>
 
-                <label>
-                    Category
+                        <span class="feed-control-label">
+                            Search
+                        </span>
 
-                    <select id="feed-category">
+                        <div class="search-field">
 
-                        <option value="">
-                            All Categories
-                        </option>
+                            <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <circle
+                                    cx="11"
+                                    cy="11"
+                                    r="7"
+                                ></circle>
 
-                        <% categories.forEach(category => { %>
+                                <path
+                                    d="M20 20L16.65 16.65"
+                                ></path>
+                            </svg>
 
-                            <option value="<%= category %>">
-                                <%= category %>
+                            <input
+                                type="search"
+                                id="feed-search"
+                                placeholder="Search stories..."
+                                autocomplete="off"
+                            >
+
+                        </div>
+
+                    </label>
+
+                    <label
+                        class="feed-control"
+                        for="feed-category"
+                    >
+
+                        <span class="feed-control-label">
+                            Category
+                        </span>
+
+                        <select id="feed-category">
+
+                            <option value="">
+                                All Categories
                             </option>
 
-                        <% }) %>
+                            <% categories.forEach(category => { %>
 
-                    </select>
-                </label>
+                                <option value="<%= category %>">
+                                    <%= category %>
+                                </option>
 
-                <label>
-                    Viewed
+                            <% }) %>
 
-                    <select id="feed-viewed">
+                        </select>
 
-                        <option value="all">
-                            All
-                        </option>
+                    </label>
 
-                        <option value="viewed">
-                            Viewed
-                        </option>
+                    <label
+                        class="feed-control"
+                        for="feed-viewed"
+                    >
 
-                        <option value="unviewed">
-                            Not Viewed
-                        </option>
+                        <span class="feed-control-label">
+                            History
+                        </span>
 
-                    </select>
-                </label>
+                        <select id="feed-viewed">
 
-                <label>
-                    Sort
+                            <option value="all">
+                                All Stories
+                            </option>
 
-                    <select id="feed-sort">
+                            <option value="viewed">
+                                Viewed
+                            </option>
 
-                        <option value="newest">
-                            Newest
-                        </option>
+                            <option value="unviewed">
+                                Not Viewed
+                            </option>
 
-                        <option value="popular">
-                            Most Popular
-                        </option>
+                        </select>
 
-                    </select>
-                </label>
+                    </label>
 
-            </div>
+                    <label
+                        class="feed-control"
+                        for="feed-sort"
+                    >
+
+                        <span class="feed-control-label">
+                            Sort
+                        </span>
+
+                        <select id="feed-sort">
+
+                            <option value="newest">
+                                Newest
+                            </option>
+
+                            <option value="popular">
+                                Most Popular
+                            </option>
+
+                        </select>
+
+                    </label>
+
+                </div>
+
+            </section>
 
             <p
                 id="feed-message"
+                class="feed-message"
                 aria-live="polite"
             ></p>
 
-            <div id="news-feed">
+            <div
+                id="news-feed"
+                class="news-feed"
+            >
 
                 <% articles.forEach(article => { %>
 
                     <article
-                        class="news-card"
+                        class="
+                            news-card
+                            <%= article.publishedVersion.imageUrl
+                                ? ""
+                                : "news-card--no-image" %>
+                        "
                         data-article-id="<%= article._id %>"
                     >
 
                         <% if (article.publishedVersion.imageUrl) { %>
 
-                            <img
-                                src="<%= article.publishedVersion.imageUrl %>"
-                                alt="<%= article.publishedVersion.title %>"
-                                loading="lazy"
+                            <a
+                                class="news-card-image-link"
+                                href="/articles/<%= article._id %>"
+                                tabindex="-1"
+                                aria-hidden="true"
                             >
+
+                                <img
+                                    class="news-card-image"
+                                    src="<%= article.publishedVersion.imageUrl %>"
+                                    alt="<%= article.publishedVersion.title %>"
+                                    loading="lazy"
+                                >
+
+                            </a>
 
                         <% } %>
 
-                        <p>
-                            <strong>
-                                <%= article.publishedVersion.category %>
-                            </strong>
-                        </p>
+                        <div class="news-card-content">
 
-                        <h3>
-                            <a
-                                href="/articles/<%= article._id %>"
-                            >
-                                <%= article.publishedVersion.title %>
-                            </a>
-                        </h3>
+                            <div class="news-card-topline">
 
-                        <p>
-                            <%= article.publishedVersion.summary %>
-                        </p>
+                                <span class="news-category">
+                                    <%= article.publishedVersion.category %>
+                                </span>
 
-                        <p>
-                            By
-                            <%= article.author.displayName %>
-                        </p>
+                                <span class="news-views">
+                                    <%= article.totalViews || 0 %>
+                                    views
+                                </span>
 
-                        <p>
-                            <%= new Date(article.publishedAt).toLocaleString() %>
-                        </p>
+                            </div>
+
+                            <h2 class="news-card-title">
+
+                                <a
+                                    href="/articles/<%= article._id %>"
+                                >
+                                    <%= article.publishedVersion.title %>
+                                </a>
+
+                            </h2>
+
+                            <p class="news-card-summary">
+                                <%= article.publishedVersion.summary %>
+                            </p>
+
+                            <footer class="news-card-footer">
+
+                                <span class="news-author">
+
+                                    By
+
+                                    <strong>
+                                        <%= article.author
+                                            ? article.author.displayName
+                                            : "Unknown" %>
+                                    </strong>
+
+                                </span>
+
+                                <time
+                                    datetime="<%= new Date(article.publishedAt).toISOString() %>"
+                                >
+                                    <%= new Date(
+                                        article.publishedAt
+                                    ).toLocaleString(
+                                        "en-GB",
+                                        {
+                                            day: "2-digit",
+                                            month: "short",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            hour12: false
+                                        }
+                                    ) %>
+                                </time>
+
+                            </footer>
+
+                        </div>
 
                     </article>
 
@@ -224,121 +446,30 @@
 
             <div
                 id="feed-sentinel"
+                class="feed-sentinel"
                 aria-hidden="true"
             ></div>
 
         </section>
 
-        <aside
-            class="weather-sidebar"
-            aria-label="Weather"
-        >
-
-            <section class="weather-widget">
-
-                <h2>
-                    Weather
-                </h2>
-
-                <% if (weather) { %>
-
-                    <p class="weather-location">
-                        <strong>
-                            <%= weather.location %>
-                        </strong>
-                    </p>
-
-                    <p class="weather-temperature">
-                        <%= Math.round(weather.temperature) %>°C
-                    </p>
-
-                    <p class="weather-description">
-                        <%= weather.description %>
-                    </p>
-
-                    <dl class="weather-details">
-
-                        <div>
-                            <dt>
-                                Feels like
-                            </dt>
-
-                            <dd>
-                                <%= Math.round(weather.apparentTemperature) %>°C
-                            </dd>
-                        </div>
-
-                        <div>
-                            <dt>
-                                Humidity
-                            </dt>
-
-                            <dd>
-                                <%= weather.humidity %>%
-                            </dd>
-                        </div>
-
-                        <div>
-                            <dt>
-                                Wind
-                            </dt>
-
-                            <dd>
-                                <%= Math.round(weather.windSpeed) %> km/h
-                            </dd>
-                        </div>
-
-                        <div>
-                            <dt>
-                                Precipitation
-                            </dt>
-
-                            <dd>
-                                <%= weather.precipitation %> mm
-                            </dd>
-                        </div>
-
-                    </dl>
-
-                    <% if (weather.stale) { %>
-
-                        <p class="weather-warning">
-                            Showing the last available weather data.
-                        </p>
-
-                    <% } %>
-
-                    <p class="weather-source">
-                        Weather data:
-
-                        <a
-                            href="https://open-meteo.com/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Open-Meteo
-                        </a>
-                    </p>
-
-                <% } else { %>
-
-                    <p>
-                        Weather information is temporarily unavailable.
-                    </p>
-
-                <% } %>
-
-            </section>
-
-        </aside>
-
     </main>
 
-    <footer>
+    <footer class="site-footer">
 
-        <p>
-            &copy; 2026 The Web Daily
-        </p>
+        <div class="site-footer-inner">
+
+            <a
+                class="footer-brand"
+                href="/"
+            >
+                The Web Daily
+            </a>
+
+            <span>
+                © 2026
+            </span>
+
+        </div>
 
     </footer>
 

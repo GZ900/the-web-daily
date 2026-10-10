@@ -1,46 +1,119 @@
-const User = require("../models/User");
+const User =
+  require("../models/User");
 
 const {
   verifyPassword
-} = require("../services/passwordService");
+} =
+  require(
+    "../services/passwordService"
+  );
 
 const {
   SESSION_DURATION,
   createSessionToken,
+  isValidSessionToken,
   hashSessionToken,
   getSessionExpiry
-} = require("../services/authService");
+} =
+  require(
+    "../services/authService"
+  );
 
-const { getCookie } = require("../utils/cookies");
+const {
+  getCookie
+} =
+  require(
+    "../utils/cookies"
+  );
 
-function getLogin(req, res) {
+const MAX_USERNAME_LENGTH =
+  50;
+
+const MAX_PASSWORD_LENGTH =
+  256;
+
+const MAX_ACTIVE_SESSIONS =
+  10;
+
+function getLogin(
+  req,
+  res
+) {
   if (req.user) {
-    if (req.user.role === "editor") {
-      return res.redirect("/editor");
+    if (
+      req.user.role ===
+      "editor"
+    ) {
+      return res.redirect(
+        "/editor"
+      );
     }
 
-    return res.redirect("/reporter");
+    return res.redirect(
+      "/reporter"
+    );
   }
 
-  res.render("login", {
-    pageTitle: "Login",
-    errorMessage: null
-  });
+  return res.render(
+    "login",
+    {
+      pageTitle:
+        "Login",
+
+      errorMessage:
+        null
+    }
+  );
 }
 
-async function login(req, res) {
+async function login(
+  req,
+  res
+) {
   try {
     const username =
-      String(req.body.username || "")
+      String(
+        req.body.username ||
+        ""
+      )
         .trim()
         .toLowerCase();
 
     const password =
-      String(req.body.password || "");
+      String(
+        req.body.password ||
+        ""
+      );
 
-    const user = await User.findOne({
-      username
-    }).select("+passwordHash +passwordSalt");
+    if (
+      !username ||
+      !password ||
+      username.length >
+        MAX_USERNAME_LENGTH ||
+      password.length >
+        MAX_PASSWORD_LENGTH
+    ) {
+      return res
+        .status(401)
+        .render(
+          "login",
+          {
+            pageTitle:
+              "Login",
+
+            errorMessage:
+              "Invalid username or password"
+          }
+        );
+    }
+
+    const user =
+      await User.findOne({
+        username
+      })
+        .select(
+          "+passwordHash +passwordSalt"
+        );
 
     if (
       !user ||
@@ -50,30 +123,66 @@ async function login(req, res) {
         user.passwordSalt
       )
     ) {
-      return res.status(401).render("login", {
-        pageTitle: "Login",
-        errorMessage:
-          "Invalid username or password"
-      });
+      return res
+        .status(401)
+        .render(
+          "login",
+          {
+            pageTitle:
+              "Login",
+
+            errorMessage:
+              "Invalid username or password"
+          }
+        );
     }
 
-    const rawToken = createSessionToken();
+    const rawToken =
+      createSessionToken();
 
     const tokenHash =
-      hashSessionToken(rawToken);
+      hashSessionToken(
+        rawToken
+      );
 
     const expiresAt =
       getSessionExpiry();
 
-    user.sessions = user.sessions.filter(
-      session =>
-        session.expiresAt > new Date()
-    );
+    const now =
+      new Date();
 
-    user.sessions.push({
+    let validSessions =
+      user.sessions.filter(
+        session =>
+          session.expiresAt &&
+          session.expiresAt >
+            now
+      );
+
+    /*
+      Prevent the embedded session
+      array from growing without limit.
+    */
+    if (
+      validSessions.length >=
+      MAX_ACTIVE_SESSIONS
+    ) {
+      validSessions =
+        validSessions.slice(
+          -(
+            MAX_ACTIVE_SESSIONS -
+            1
+          )
+        );
+    }
+
+    validSessions.push({
       tokenHash,
       expiresAt
     });
+
+    user.sessions =
+      validSessions;
 
     await user.save();
 
@@ -81,38 +190,72 @@ async function login(req, res) {
       "webDailySession",
       rawToken,
       {
+        path: "/",
         httpOnly: true,
         sameSite: "lax",
-        maxAge: SESSION_DURATION
+
+        secure:
+          process.env.NODE_ENV ===
+          "production",
+
+        maxAge:
+          SESSION_DURATION
       }
     );
 
-    if (user.role === "editor") {
-      return res.redirect("/editor");
+    if (
+      user.role ===
+      "editor"
+    ) {
+      return res.redirect(
+        "/editor"
+      );
     }
 
-    res.redirect("/reporter");
-  } catch (error) {
-    console.error("Login error:", error);
-
-    res.status(500).send(
-      "Internal Server Error"
+    return res.redirect(
+      "/reporter"
     );
+  } catch (error) {
+    console.error(
+      "Login error:",
+      error
+    );
+
+    return res
+      .status(500)
+      .send(
+        "Internal Server Error"
+      );
   }
 }
 
-async function logout(req, res) {
+async function logout(
+  req,
+  res
+) {
   try {
     const rawToken =
-      getCookie(req, "webDailySession");
+      getCookie(
+        req,
+        "webDailySession"
+      );
 
-    if (rawToken && req.user) {
+    if (
+      rawToken &&
+      req.user &&
+      isValidSessionToken(
+        rawToken
+      )
+    ) {
       const tokenHash =
-        hashSessionToken(rawToken);
+        hashSessionToken(
+          rawToken
+        );
 
       await User.updateOne(
         {
-          _id: req.user._id
+          _id:
+            req.user._id
         },
         {
           $pull: {
@@ -124,15 +267,33 @@ async function logout(req, res) {
       );
     }
 
-    res.clearCookie("webDailySession");
+    res.clearCookie(
+      "webDailySession",
+      {
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax",
 
-    res.redirect("/login");
-  } catch (error) {
-    console.error("Logout error:", error);
-
-    res.status(500).send(
-      "Internal Server Error"
+        secure:
+          process.env.NODE_ENV ===
+          "production"
+      }
     );
+
+    return res.redirect(
+      "/login"
+    );
+  } catch (error) {
+    console.error(
+      "Logout error:",
+      error
+    );
+
+    return res
+      .status(500)
+      .send(
+        "Internal Server Error"
+      );
   }
 }
 

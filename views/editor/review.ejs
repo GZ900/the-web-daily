@@ -9,6 +9,11 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <meta
+        name="color-scheme"
+        content="light dark"
+    >
+
     <title><%= pageTitle %> | The Web Daily</title>
 
     <link
@@ -27,169 +32,289 @@
     ></script>
 </head>
 
-<body>
+<body class="staff-page">
 
     <%- include("../partials/staffHeader", {
-        staffRole: "editor"
+        staffRole: "editor",
+        activeSection: "dashboard"
     }) %>
 
-    <main>
+    <main class="dashboard-shell">
 
         <section
             id="editor-review"
+            class="editor-review-shell"
             data-article-id="<%= article._id %>"
             data-status="<%= article.status %>"
         >
 
-            <h2>
-                Review Article
-            </h2>
+            <header class="dashboard-page-heading review-page-heading">
 
-            <p>
-                Reporter:
-                <strong>
-                    <%= article.author.displayName %>
-                </strong>
-            </p>
+                <div>
 
-            <p>
-                Status:
-                <strong>
-                    <%= article.status %>
-                </strong>
-            </p>
+                    <span class="dashboard-eyebrow">
+                        EDITOR REVIEW
+                    </span>
+
+                    <h1>
+                        Review Article.
+                    </h1>
+
+                    <div class="review-metadata">
+
+                        <span>
+                            Reporter
+
+                            <strong>
+                                <%= article.author.displayName %>
+                            </strong>
+                        </span>
+
+                        <span
+                            class="status-pill status-<%= article.status %>"
+                        >
+                            <%= article.status %>
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </header>
 
             <% if (article.publishedVersion) { %>
 
-                <section>
+                <section class="review-version-card published-version-card">
 
-                    <h2>
-                        Currently Published Version
-                    </h2>
+                    <header class="review-section-heading">
 
-                    <h3>
-                        <%= article.publishedVersion.title %>
-                    </h3>
+                        <div>
 
-                    <p>
-                        <%= article.publishedVersion.summary %>
-                    </p>
+                            <span class="management-card-label">
+                                LIVE VERSION
+                            </span>
 
-                    <p>
-                        Category:
-                        <%= article.publishedVersion.category %>
-                    </p>
+                            <h2>
+                                Currently Published
+                            </h2>
 
-                    <div>
-                        <%= article.publishedVersion.content %>
+                        </div>
+
+                        <span class="review-live-pill">
+                            Public
+                        </span>
+
+                    </header>
+
+                    <div class="published-preview">
+
+                        <span class="review-category">
+                            <%= article.publishedVersion.category %>
+                        </span>
+
+                        <h3>
+                            <%= article.publishedVersion.title %>
+                        </h3>
+
+                        <p class="review-summary">
+                            <%= article.publishedVersion.summary %>
+                        </p>
+
+                        <div class="review-content-preview">
+                            <%= article.publishedVersion.content %>
+                        </div>
+
                     </div>
 
                 </section>
 
-                <hr>
-
             <% } %>
 
-            <section>
+            <section class="review-version-card">
 
-                <h2>
-                    Working Version
-                </h2>
+                <header class="review-section-heading">
 
-                <label>
-                    Title
+                    <div>
 
-                    <input
-                        id="editor-title"
-                        type="text"
-                        value="<%= article.workingVersion.title %>"
-                    >
-                </label>
+                        <span class="management-card-label">
+                            WORKING VERSION
+                        </span>
 
-                <label>
-                    Summary
+                        <h2>
+                            Submitted Content
+                        </h2>
 
-                    <textarea
-                        id="editor-summary"
-                    ><%= article.workingVersion.summary %></textarea>
-                </label>
+                    </div>
 
-                <label>
-                    Category
+                </header>
 
-                    <input
-                        id="editor-category"
-                        type="text"
-                        value="<%= article.workingVersion.category %>"
-                    >
-                </label>
+                <div class="editor-form-grid">
 
-                <label>
-                    Image URL
+                    <label class="dashboard-control editor-field-wide">
 
-                    <input
-                        id="editor-image"
-                        type="url"
-                        value="<%= article.workingVersion.imageUrl %>"
-                    >
-                </label>
+                        <span>
+                            Title
+                        </span>
 
-                <label>
-                    Content
+                        <input
+                            id="editor-title"
+                            type="text"
+                            value="<%= article.workingVersion.title %>"
+                        >
 
-                    <textarea
-                        id="editor-content"
-                    ><%= article.workingVersion.content %></textarea>
-                </label>
+                    </label>
+
+                    <label class="dashboard-control">
+
+                        <span>
+                            Category
+                        </span>
+
+                        <input
+                            id="editor-category"
+                            type="text"
+                            value="<%= article.workingVersion.category %>"
+                        >
+
+                    </label>
+
+                    <label class="dashboard-control">
+
+                        <span>
+                            Image URL
+                        </span>
+
+                        <input
+                            id="editor-image"
+                            type="url"
+                            value="<%= article.workingVersion.imageUrl %>"
+                        >
+
+                    </label>
+
+                    <label class="dashboard-control editor-field-wide">
+
+                        <span>
+                            Summary
+                        </span>
+
+                        <textarea
+                            id="editor-summary"
+                            class="editor-summary-field"
+                        ><%= article.workingVersion.summary %></textarea>
+
+                    </label>
+
+                    <label class="dashboard-control editor-field-wide">
+
+                        <span>
+                            Content
+                        </span>
+
+                        <textarea
+                            id="editor-content"
+                            class="editor-content-field"
+                        ><%= article.workingVersion.content %></textarea>
+
+                    </label>
+
+                </div>
 
             </section>
 
             <% if (article.status === "pending") { %>
 
-                <button
-                    type="button"
-                    id="editor-save"
-                >
-                    Save Changes
-                </button>
+                <section class="review-action-card">
 
-                <button
-                    type="button"
-                    id="editor-approve"
-                >
-                    Approve and Publish
-                </button>
+                    <div class="review-main-actions">
 
-                <section>
+                        <button
+                            type="button"
+                            id="editor-save"
+                            class="secondary-action"
+                        >
+                            Save Changes
+                        </button>
 
-                    <h3>
-                        Return to Reporter
-                    </h3>
+                        <button
+                            type="button"
+                            id="editor-approve"
+                            class="approve-action"
+                        >
+                            Approve & Publish
+                        </button>
 
-                    <textarea
-                        id="editor-note"
-                        placeholder="Explain what needs to be changed"
-                    ></textarea>
+                    </div>
 
-                    <button
-                        type="button"
-                        id="editor-return"
-                    >
-                        Return for Changes
-                    </button>
+                    <div class="return-to-reporter">
+
+                        <div>
+
+                            <span class="management-card-label">
+                                REQUEST CHANGES
+                            </span>
+
+                            <h3>
+                                Return to Reporter
+                            </h3>
+
+                            <p>
+                                Explain what should be
+                                changed before the article
+                                can be approved.
+                            </p>
+
+                        </div>
+
+                        <textarea
+                            id="editor-note"
+                            placeholder="Explain what needs to be changed..."
+                        ></textarea>
+
+                        <button
+                            type="button"
+                            id="editor-return"
+                            class="return-action"
+                        >
+                            Return for Changes
+                        </button>
+
+                    </div>
 
                 </section>
 
             <% } %>
 
-            <button
-                type="button"
-                id="editor-delete"
-            >
-                Delete Article
-            </button>
+            <section class="review-danger-zone">
 
-            <p id="editor-message"></p>
+                <div>
+
+                    <h3>
+                        Delete Article
+                    </h3>
+
+                    <p>
+                        Permanently remove this article
+                        and its related data.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="editor-delete"
+                    class="danger-action"
+                >
+                    Delete Article
+                </button>
+
+            </section>
+
+            <p
+                id="editor-message"
+                class="management-message review-message"
+                aria-live="polite"
+            ></p>
 
         </section>
 
