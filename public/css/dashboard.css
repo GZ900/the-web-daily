@@ -1,0 +1,87 @@
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.dashboard-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.dashboard-header-actions nav {
+    display: flex;
+    gap: 14px;
+}
+
+.dashboard-header-actions form {
+    margin: 0;
+}
+
+.dashboard-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: end;
+    margin: 24px 0;
+}
+
+.dashboard-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dashboard-controls input,
+.dashboard-controls select {
+    min-width: 170px;
+}
+
+.dashboard-summary {
+    margin: 18px 0;
+}
+
+.dashboard-article {
+    margin: 20px 0;
+}
+
+.dashboard-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin: 28px 0;
+}
+
+.dashboard-pagination a,
+.dashboard-pagination span {
+    padding: 6px 10px;
+}
+
+.dashboard-pagination .current-page {
+    font-weight: bold;
+}
+
+@media (max-width: 700px) {
+    .dashboard-header {
+        align-items: flex-start;
+    }
+
+    .dashboard-header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .dashboard-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dashboard-controls input,
+    .dashboard-controls select {
+        width: 100%;
+    }
+}
