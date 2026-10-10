@@ -16,6 +16,11 @@
         href="/css/style.css"
     >
 
+    <link
+        rel="stylesheet"
+        href="/css/dashboard.css"
+    >
+
     <script
         src="/js/editorReview.js"
         defer
@@ -24,15 +29,9 @@
 
 <body>
 
-    <header>
-        <h1>The Web Daily</h1>
-
-        <nav>
-            <a href="/editor">
-                Editor Dashboard
-            </a>
-        </nav>
-    </header>
+    <%- include("../partials/staffHeader", {
+        staffRole: "editor"
+    }) %>
 
     <main>
 
@@ -42,7 +41,9 @@
             data-status="<%= article.status %>"
         >
 
-            <h2>Review Article</h2>
+            <h2>
+                Review Article
+            </h2>
 
             <p>
                 Reporter:
@@ -62,7 +63,9 @@
 
                 <section>
 
-                    <h2>Currently Published Version</h2>
+                    <h2>
+                        Currently Published Version
+                    </h2>
 
                     <h3>
                         <%= article.publishedVersion.title %>
@@ -89,7 +92,9 @@
 
             <section>
 
-                <h2>Working Version</h2>
+                <h2>
+                    Working Version
+                </h2>
 
                 <label>
                     Title
@@ -157,7 +162,9 @@
 
                 <section>
 
-                    <h3>Return to Reporter</h3>
+                    <h3>
+                        Return to Reporter
+                    </h3>
 
                     <textarea
                         id="editor-note"

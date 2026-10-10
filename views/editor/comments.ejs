@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title><%= pageTitle %></title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/dashboard.css"
+    >
+
+    <script
+        src="/js/adminComments.js"
+        defer
+    ></script>
+</head>
+
+<body>
+
+    <%- include("../partials/staffHeader", {
+        staffRole: "editor"
+    }) %>
+
+    <main>
+
+        <h2>
+            Comment Management
+        </h2>
+
+        <form
+            class="dashboard-controls"
+            method="GET"
+            action="/editor/comments"
+        >
+
+            <label>
+                Search
+
+                <input
+                    type="search"
+                    name="search"
+                    value="<%= search %>"
+                    placeholder="Name or comment text"
+                >
+            </label>
+
+            <label>
+                Sort
+
+                <select name="sort">
+
+                    <option
+                        value="newest"
+                        <%= selectedSort === "newest" ? "selected" : "" %>
+                    >
+                        Newest
+                    </option>
+
+                    <option
+                        value="oldest"
+                        <%= selectedSort === "oldest" ? "selected" : "" %>
+                    >
+                        Oldest
+                    </option>
+
+                </select>
+            </label>
+
+            <button type="submit">
+                Apply
+            </button>
+
+            <a href="/editor/comments">
+                Clear
+            </a>
+
+        </form>
+
+        <p>
+            <strong>
+                <%= totalComments %>
+            </strong>
+            comments found
+        </p>
+
+        <section id="comment-list">
+
+            <% comments.forEach(comment => { %>
+
+                <article
+                    class="dashboard-article comment-card"
+                    data-comment-id="<%= comment._id %>"
+                >
+
+                    <p>
+                        Article:
+                        <strong>
+                            <%
+                                const articleTitle =
+                                    comment.article
+                                        ? (
+                                            comment.article.publishedVersion &&
+                                            comment.article.publishedVersion.title
+                                                ? comment.article.publishedVersion.title
+                                                : comment.article.workingVersion.title
+                                        )
+                                        : "Deleted article";
+                            %>
+
+                            <%= articleTitle %>
+                        </strong>
+                    </p>
+
+                    <label>
+                        Name
+
+                        <input
+                            class="comment-name"
+                            value="<%= comment.name %>"
+                        >
+                    </label>
+
+                    <label>
+                        Comment
+
+                        <textarea
+                            class="comment-text"
+                            rows="4"
+                        ><%= comment.text %></textarea>
+                    </label>
+
+                    <p>
+                        Created:
+                        <%= new Date(comment.createdAt).toLocaleString("en-GB") %>
+                    </p>
+
+                    <button
+                        type="button"
+                        class="save-comment"
+                    >
+                        Save
+                    </button>
+
+                    <button
+                        type="button"
+                        class="delete-comment"
+                    >
+                        Delete
+                    </button>
+
+                    <p
+                        class="comment-message"
+                        aria-live="polite"
+                    ></p>
+
+                </article>
+
+                <hr>
+
+            <% }) %>
+
+        </section>
+
+        <% if (totalPages > 1) { %>
+
+            <nav class="dashboard-pagination">
+
+                <% if (page > 1) { %>
+
+                    <a
+                        href="/editor/comments?<%= paginationQuery ? paginationQuery + '&' : '' %>page=<%= page - 1 %>"
+                    >
+                        Previous
+                    </a>
+
+                <% } %>
+
+                <span>
+                    Page
+                    <%= page %>
+                    of
+                    <%= totalPages %>
+                </span>
+
+                <% if (page < totalPages) { %>
+
+                    <a
+                        href="/editor/comments?<%= paginationQuery ? paginationQuery + '&' : '' %>page=<%= page + 1 %>"
+                    >
+                        Next
+                    </a>
+
+                <% } %>
+
+            </nav>
+
+        <% } %>
+
+    </main>
+
+</body>
+
+</html>

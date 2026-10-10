@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title><%= pageTitle %></title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/dashboard.css"
+    >
+
+    <script
+        src="/js/adminUsers.js"
+        defer
+    ></script>
+</head>
+
+<body>
+
+    <%- include("../partials/staffHeader", {
+        staffRole: "editor"
+    }) %>
+
+    <main>
+
+        <h2>
+            User Management
+        </h2>
+
+        <section>
+
+            <h3>
+                Create User
+            </h3>
+
+            <form id="create-user-form">
+
+                <label>
+                    Username
+
+                    <input
+                        id="new-username"
+                        required
+                    >
+                </label>
+
+                <label>
+                    Display Name
+
+                    <input
+                        id="new-display-name"
+                        required
+                    >
+                </label>
+
+                <label>
+                    Password
+
+                    <input
+                        id="new-password"
+                        type="password"
+                        minlength="8"
+                        required
+                    >
+                </label>
+
+                <label>
+                    Role
+
+                    <select id="new-role">
+
+                        <option value="reporter">
+                            Reporter
+                        </option>
+
+                        <option value="editor">
+                            Editor
+                        </option>
+
+                    </select>
+                </label>
+
+                <button type="submit">
+                    Create User
+                </button>
+
+            </form>
+
+            <p
+                id="create-user-message"
+                aria-live="polite"
+            ></p>
+
+        </section>
+
+        <hr>
+
+        <form
+            class="dashboard-controls"
+            method="GET"
+            action="/editor/users"
+        >
+
+            <label>
+                Search
+
+                <input
+                    type="search"
+                    name="search"
+                    value="<%= search %>"
+                    placeholder="Name or username"
+                >
+            </label>
+
+            <label>
+                Role
+
+                <select name="role">
+
+                    <option
+                        value=""
+                        <%= !selectedRole ? "selected" : "" %>
+                    >
+                        All
+                    </option>
+
+                    <option
+                        value="reporter"
+                        <%= selectedRole === "reporter" ? "selected" : "" %>
+                    >
+                        Reporter
+                    </option>
+
+                    <option
+                        value="editor"
+                        <%= selectedRole === "editor" ? "selected" : "" %>
+                    >
+                        Editor
+                    </option>
+
+                </select>
+
+            </label>
+
+            <button type="submit">
+                Apply
+            </button>
+
+            <a href="/editor/users">
+                Clear
+            </a>
+
+        </form>
+
+        <p>
+            <strong>
+                <%= totalUsers %>
+            </strong>
+            users found
+        </p>
+
+        <section id="user-list">
+
+            <% users.forEach(user => { %>
+
+                <article
+                    class="dashboard-article user-card"
+                    data-user-id="<%= user._id %>"
+                >
+
+                    <label>
+                        Username
+
+                        <input
+                            class="user-username"
+                            value="<%= user.username %>"
+                        >
+                    </label>
+
+                    <label>
+                        Display Name
+
+                        <input
+                            class="user-display-name"
+                            value="<%= user.displayName %>"
+                        >
+                    </label>
+
+                    <label>
+                        Role
+
+                        <select class="user-role">
+
+                            <option
+                                value="reporter"
+                                <%= user.role === "reporter" ? "selected" : "" %>
+                            >
+                                Reporter
+                            </option>
+
+                            <option
+                                value="editor"
+                                <%= user.role === "editor" ? "selected" : "" %>
+                            >
+                                Editor
+                            </option>
+
+                        </select>
+                    </label>
+
+                    <label>
+                        New Password
+                        (optional)
+
+                        <input
+                            class="user-password"
+                            type="password"
+                            minlength="8"
+                        >
+                    </label>
+
+                    <button
+                        type="button"
+                        class="save-user"
+                    >
+                        Save
+                    </button>
+
+                    <button
+                        type="button"
+                        class="delete-user"
+                    >
+                        Delete
+                    </button>
+
+                    <p
+                        class="user-message"
+                        aria-live="polite"
+                    ></p>
+
+                </article>
+
+                <hr>
+
+            <% }) %>
+
+        </section>
+
+        <% if (totalPages > 1) { %>
+
+            <nav class="dashboard-pagination">
+
+                <% if (page > 1) { %>
+
+                    <a
+                        href="/editor/users?<%= paginationQuery ? paginationQuery + '&' : '' %>page=<%= page - 1 %>"
+                    >
+                        Previous
+                    </a>
+
+                <% } %>
+
+                <span>
+                    Page
+                    <%= page %>
+                    of
+                    <%= totalPages %>
+                </span>
+
+                <% if (page < totalPages) { %>
+
+                    <a
+                        href="/editor/users?<%= paginationQuery ? paginationQuery + '&' : '' %>page=<%= page + 1 %>"
+                    >
+                        Next
+                    </a>
+
+                <% } %>
+
+            </nav>
+
+        <% } %>
+
+    </main>
+
+</body>
+
+</html>

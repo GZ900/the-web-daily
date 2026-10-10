@@ -24,34 +24,9 @@
 
 <body>
 
-    <header class="dashboard-header">
-
-        <div>
-            <h1>
-                The Web Daily
-            </h1>
-        </div>
-
-        <div class="dashboard-header-actions">
-
-            <nav>
-                <a href="/">
-                    Public Site
-                </a>
-            </nav>
-
-            <form
-                method="POST"
-                action="/logout"
-            >
-                <button type="submit">
-                    Logout
-                </button>
-            </form>
-
-        </div>
-
-    </header>
+    <%- include("../partials/staffHeader", {
+        staffRole: "reporter"
+    }) %>
 
     <main>
 

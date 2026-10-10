@@ -1,0 +1,56 @@
+<header class="dashboard-header">
+
+    <h1>
+        The Web Daily
+    </h1>
+
+    <div class="dashboard-header-actions">
+
+        <nav>
+
+            <a href="/">
+                Home
+            </a>
+
+            <% if (staffRole === "reporter") { %>
+
+                <a href="/reporter">
+                    Dashboard
+                </a>
+
+            <% } %>
+
+            <% if (staffRole === "editor") { %>
+
+                <a href="/editor">
+                    Dashboard
+                </a>
+
+                <a href="/editor/analytics">
+                    Analytics
+                </a>
+
+                <a href="/editor/users">
+                    Users
+                </a>
+
+                <a href="/editor/comments">
+                    Comments
+                </a>
+
+            <% } %>
+
+        </nav>
+
+        <form
+            method="POST"
+            action="/logout"
+        >
+            <button type="submit">
+                Logout
+            </button>
+        </form>
+
+    </div>
+
+</header>

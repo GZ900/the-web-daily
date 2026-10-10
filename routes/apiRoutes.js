@@ -36,6 +36,22 @@ const {
 );
 
 const {
+  createUser,
+  updateUser,
+  deleteUser,
+
+  updateComment,
+  deleteComment,
+
+  listViewStats,
+  createViewStat,
+  updateViewStat,
+  deleteViewStat
+} = require(
+  "../controllers/adminController"
+);
+
+const {
   requireReporter,
   requireEditor
 } = require(
@@ -44,6 +60,10 @@ const {
 
 const router =
   express.Router();
+
+/*
+  PUBLIC
+*/
 
 router.get(
   "/articles",
@@ -54,6 +74,10 @@ router.post(
   "/articles/:id/comments",
   createComment
 );
+
+/*
+  REPORTER
+*/
 
 router.patch(
   "/reporter/articles/:id",
@@ -66,6 +90,10 @@ router.patch(
   requireReporter,
   submitArticle
 );
+
+/*
+  EDITOR ARTICLES
+*/
 
 router.patch(
   "/editor/articles/:id",
@@ -95,6 +123,72 @@ router.get(
   "/editor/articles/:id/analytics",
   requireEditor,
   getArticleAnalytics
+);
+
+/*
+  USER CRUD
+*/
+
+router.post(
+  "/editor/users",
+  requireEditor,
+  createUser
+);
+
+router.patch(
+  "/editor/users/:id",
+  requireEditor,
+  updateUser
+);
+
+router.delete(
+  "/editor/users/:id",
+  requireEditor,
+  deleteUser
+);
+
+/*
+  COMMENT CRUD
+*/
+
+router.patch(
+  "/editor/comments/:id",
+  requireEditor,
+  updateComment
+);
+
+router.delete(
+  "/editor/comments/:id",
+  requireEditor,
+  deleteComment
+);
+
+/*
+  VIEWSTAT CRUD
+*/
+
+router.get(
+  "/editor/view-stats",
+  requireEditor,
+  listViewStats
+);
+
+router.post(
+  "/editor/view-stats",
+  requireEditor,
+  createViewStat
+);
+
+router.patch(
+  "/editor/view-stats/:id",
+  requireEditor,
+  updateViewStat
+);
+
+router.delete(
+  "/editor/view-stats/:id",
+  requireEditor,
+  deleteViewStat
 );
 
 module.exports = router;

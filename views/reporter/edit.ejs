@@ -16,6 +16,11 @@
         href="/css/style.css"
     >
 
+    <link
+        rel="stylesheet"
+        href="/css/dashboard.css"
+    >
+
     <script
         src="/js/reporterEditor.js"
         defer
@@ -24,15 +29,9 @@
 
 <body>
 
-    <header>
-        <h1>The Web Daily</h1>
-
-        <nav>
-            <a href="/reporter">
-                Reporter Dashboard
-            </a>
-        </nav>
-    </header>
+    <%- include("../partials/staffHeader", {
+        staffRole: "reporter"
+    }) %>
 
     <main>
 
@@ -41,11 +40,15 @@
             data-article-id="<%= article._id %>"
         >
 
-            <h2>Edit Article</h2>
+            <h2>
+                Edit Article
+            </h2>
 
             <p>
                 Status:
-                <strong><%= article.status %></strong>
+                <strong>
+                    <%= article.status %>
+                </strong>
             </p>
 
             <% if (article.publishedVersion) { %>
@@ -61,7 +64,10 @@
             <% if (article.editorNote) { %>
 
                 <p>
-                    <strong>Editor note:</strong>
+                    <strong>
+                        Editor note:
+                    </strong>
+
                     <%= article.editorNote %>
                 </p>
 

@@ -15,6 +15,13 @@ const {
 );
 
 const {
+  getUsersPage,
+  getCommentsPage
+} = require(
+  "../controllers/adminController"
+);
+
+const {
   requireEditor
 } = require(
   "../middleware/auth"
@@ -35,6 +42,16 @@ router.get(
 router.get(
   "/analytics",
   getAnalyticsPage
+);
+
+router.get(
+  "/users",
+  getUsersPage
+);
+
+router.get(
+  "/comments",
+  getCommentsPage
 );
 
 router.get(

@@ -21,6 +21,11 @@
         href="/css/weather.css"
     >
 
+    <link
+        rel="stylesheet"
+        href="/css/dashboard.css"
+    >
+
     <script
         src="/js/feed.js"
         defer
@@ -29,20 +34,66 @@
 
 <body>
 
-    <header>
-        <h1>The Web Daily</h1>
+    <header class="dashboard-header">
 
-        <nav>
-            <a href="/">Home</a>
-            <a href="/login">Staff Login</a>
-        </nav>
+        <h1>
+            The Web Daily
+        </h1>
+
+        <div class="dashboard-header-actions">
+
+            <nav>
+
+                <a href="/">
+                    Home
+                </a>
+
+                <% if (!currentUser) { %>
+
+                    <a href="/login">
+                        Staff Login
+                    </a>
+
+                <% } else if (currentUser.role === "reporter") { %>
+
+                    <a href="/reporter">
+                        Reporter Dashboard
+                    </a>
+
+                <% } else if (currentUser.role === "editor") { %>
+
+                    <a href="/editor">
+                        Editor Dashboard
+                    </a>
+
+                <% } %>
+
+            </nav>
+
+            <% if (currentUser) { %>
+
+                <form
+                    method="POST"
+                    action="/logout"
+                >
+                    <button type="submit">
+                        Logout
+                    </button>
+                </form>
+
+            <% } %>
+
+        </div>
+
     </header>
 
     <main class="home-layout">
 
         <section class="feed-column">
 
-            <h2>Latest News</h2>
+            <h2>
+                Latest News
+            </h2>
 
             <div id="feed-controls">
 
@@ -185,7 +236,9 @@
 
             <section class="weather-widget">
 
-                <h2>Weather</h2>
+                <h2>
+                    Weather
+                </h2>
 
                 <% if (weather) { %>
 
@@ -206,7 +259,9 @@
                     <dl class="weather-details">
 
                         <div>
-                            <dt>Feels like</dt>
+                            <dt>
+                                Feels like
+                            </dt>
 
                             <dd>
                                 <%= Math.round(weather.apparentTemperature) %>°C
@@ -214,7 +269,9 @@
                         </div>
 
                         <div>
-                            <dt>Humidity</dt>
+                            <dt>
+                                Humidity
+                            </dt>
 
                             <dd>
                                 <%= weather.humidity %>%
@@ -222,7 +279,9 @@
                         </div>
 
                         <div>
-                            <dt>Wind</dt>
+                            <dt>
+                                Wind
+                            </dt>
 
                             <dd>
                                 <%= Math.round(weather.windSpeed) %> km/h
@@ -230,7 +289,9 @@
                         </div>
 
                         <div>
-                            <dt>Precipitation</dt>
+                            <dt>
+                                Precipitation
+                            </dt>
 
                             <dd>
                                 <%= weather.precipitation %> mm
@@ -249,6 +310,7 @@
 
                     <p class="weather-source">
                         Weather data:
+
                         <a
                             href="https://open-meteo.com/"
                             target="_blank"
@@ -273,9 +335,11 @@
     </main>
 
     <footer>
+
         <p>
             &copy; 2026 The Web Daily
         </p>
+
     </footer>
 
 </body>
