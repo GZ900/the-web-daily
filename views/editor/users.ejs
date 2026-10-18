@@ -30,6 +30,7 @@
         src="/js/adminUsers.js"
         defer
     ></script>
+    <link rel="stylesheet" href="/css/site.css">
 </head>
 
 <body class="staff-page">
@@ -80,7 +81,7 @@
 
             </header>
 
-            <form
+            <form autocomplete="off"
                 id="create-user-form"
                 class="create-user-grid"
             >
@@ -91,7 +92,7 @@
                         Username
                     </span>
 
-                    <input
+                    <input autocomplete="off"
                         id="new-username"
                         required
                     >
@@ -104,7 +105,7 @@
                         Display Name
                     </span>
 
-                    <input
+                    <input autocomplete="off"
                         id="new-display-name"
                         required
                     >
@@ -117,7 +118,7 @@
                         Password
                     </span>
 
-                    <input
+                    <input autocomplete="new-password"
                         id="new-password"
                         type="password"
                         minlength="8"
@@ -165,7 +166,7 @@
 
         <section class="dashboard-controls-panel management-filter-panel">
 
-            <form
+            <form autocomplete="off"
                 class="dashboard-controls user-filter-controls"
                 method="GET"
                 action="/editor/users"
@@ -177,7 +178,7 @@
                         Search
                     </span>
 
-                    <input
+                    <input autocomplete="off"
                         type="search"
                         name="search"
                         value="<%= search %>"
@@ -307,7 +308,7 @@
                                 Username
                             </span>
 
-                            <input
+                            <input autocomplete="off"
                                 class="user-username"
                                 value="<%= user.username %>"
                             >
@@ -320,7 +321,7 @@
                                 Display Name
                             </span>
 
-                            <input
+                            <input autocomplete="off"
                                 class="user-display-name"
                                 value="<%= user.displayName %>"
                             >
@@ -359,7 +360,7 @@
                                 New Password
                             </span>
 
-                            <input
+                            <input autocomplete="new-password"
                                 class="user-password"
                                 type="password"
                                 minlength="8"

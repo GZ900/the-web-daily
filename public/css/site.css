@@ -1,0 +1,166 @@
+@import url("/css/dropdown.css");
+
+/* Shared presentation for the public site and newsroom. Analytics keeps its
+   page-specific layout and chart theme in analytics.css. */
+:root {
+    --focus-ring: color-mix(in srgb, var(--link) 24%, transparent);
+    --danger: #b82d25;
+    --success: #16723c;
+}
+html[data-theme="dark"] { --danger: #ff827a; --success: #65d995; }
+:where(a, button, input, select, textarea):focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 3px;
+}
+:where(input, select, textarea) { color-scheme: inherit; }
+:where(h1, h2, h3, p) { overflow-wrap: anywhere; }
+.back-link { display: inline-block; margin-bottom: 24px; color: var(--text-secondary); font-size: .82rem; text-decoration: none; }
+.back-link:hover { color: var(--text-primary); }
+.site-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.site-field > span { font-size: .7rem; font-weight: 650; color: var(--text-secondary); }
+.site-field input, .site-field textarea {
+    width: 100%; min-width: 0; padding: 11px 12px; color: var(--text-primary);
+    background: var(--surface-secondary); border: 1px solid transparent;
+    border-radius: 11px; font-size: .9rem; resize: vertical;
+}
+.site-field input { height: 42px; }
+.site-field textarea { line-height: 1.6; }
+.site-field input:focus, .site-field textarea:focus { background: var(--surface-solid); border-color: var(--border-strong); outline: 3px solid var(--focus-ring); }
+.site-field input::placeholder, .site-field textarea::placeholder { color: var(--text-tertiary); }
+.site-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 10px 18px; border: 0; border-radius: 11px; background: var(--text-primary); color: var(--background); font-size: .86rem; font-weight: 650; cursor: pointer; }
+.site-primary:hover { opacity: .86; }
+.site-message { color: var(--text-secondary); font-size: .82rem; }
+.site-message:empty { margin: 0; }
+
+/* Compact filter surfaces, matching the Analytics toolbar. */
+.feed-controls-panel { padding: 14px 16px; }
+.feed-control-label { padding-left: 7px; font-size: .63rem; letter-spacing: .075em; font-weight: 700; }
+.feed-control input, .feed-control select, .search-field { height: 40px; min-height: 40px; border-radius: 11px; font-size: .85rem; }
+.feed-control input, .feed-control select { padding: 0 12px; }
+.feed-control-search .search-field input { background: transparent; }
+.feed-heading h1 { max-width: 850px; font-size: clamp(2.35rem, 5vw, 4.5rem); }
+.feed-introduction { font-size: 1rem; margin-top: 15px; }
+.news-card { border-radius: 20px; min-height: 180px; }
+.news-card-title { overflow-wrap: anywhere; }
+.feed-message { font-size: .78rem; }
+/* Enhancement mechanics; visual styling lives in dropdown.css. */
+.site-select-native { display: none; }
+.site-select.is-open { z-index: 100; }
+.site-select.opens-up .analytics-select-menu { top: auto; bottom: calc(100% + 6px); }
+.site-select .analytics-select-menu { overscroll-behavior: contain; }
+.site-select .analytics-select-option { white-space: normal; overflow-wrap: anywhere; }
+.site-select .analytics-select-option:focus-visible { outline-offset: -3px; }
+.dropdown-surface-open.dropdown-surface-open { position: relative; z-index: 100; }
+
+/* Editorial article and conversation. */
+.article-shell { width: min(960px, calc(100% - 40px)); margin: 0 auto; padding: 42px 0 64px; }
+.article-page, .comments-section { margin: 0; padding: 0; max-width: none; }
+.article-heading { max-width: 850px; margin: 0 auto 28px; }
+.article-heading h1 { margin: 0; font-size: clamp(2.2rem, 4.5vw, 3.8rem); line-height: 1.07; letter-spacing: -.045em; font-weight: 720; }
+.article-summary { margin: 20px 0 24px; color: var(--text-secondary); font-size: 1.17rem; line-height: 1.65; }
+.article-metadata { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 18px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text-secondary); font-size: .8rem; }
+.article-metadata strong { color: var(--text-primary); font-weight: 650; }
+.article-page .article-hero { display: block; width: 100%; max-height: 560px; object-fit: cover; border-radius: 20px; margin: 0 0 34px; background: var(--surface-secondary); }
+.article-content { max-width: 720px; margin: 0 auto; font-family: Georgia, "Times New Roman", serif; font-size: 1.15rem; line-height: 1.85; }
+.article-content p { margin: 0; white-space: pre-wrap; }
+.comments-section { max-width: 720px; margin: 48px auto 0; padding-top: 32px; border-top: 1px solid var(--border); }
+.comments-heading h2 { margin: 0; font-size: 1.8rem; letter-spacing: -.035em; }
+.comments-heading p { margin: 10px 0 24px; color: var(--text-secondary); font-size: .9rem; }
+#comment-form { display: grid; gap: 18px; margin-bottom: 24px; padding: 22px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface-solid); box-shadow: var(--shadow-small); }
+#comment-form label { display: flex; flex-direction: column; gap: 7px; }
+#comment-form textarea { min-height: 120px; }
+.comment-form-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.comment-form-footer > span { max-width: 300px; color: var(--text-tertiary); font-size: .72rem; }
+#comments-list { display: flex; flex-direction: column; gap: 12px; }
+.comment { padding: 20px 22px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-solid); }
+.comment strong { font-size: .9rem; }
+.comment p { margin: 10px 0 14px; line-height: 1.65; white-space: pre-wrap; }
+.comment small { color: var(--text-tertiary); font-size: .72rem; }
+
+/* Shared login form; native dialog provides focus containment and Escape. */
+.login-shell { min-height: calc(100vh - 190px); display: grid; place-items: center; padding: 56px 20px; }
+.login-card, .login-dialog { width: min(440px, 100%); padding: 32px; background: var(--surface-solid); color: var(--text-primary); border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--shadow-card); }
+.login-card h1, .login-dialog h2 { margin: 0; font-size: 2.15rem; line-height: 1.1; letter-spacing: -.045em; }
+.login-card > p, .login-dialog > p { color: var(--text-secondary); font-size: .9rem; line-height: 1.6; margin: 14px 0 24px; }
+.login-form { display: grid; gap: 18px; }
+.login-form .site-primary { width: 100%; margin-top: 4px; }
+.login-fallback-link { display: block; margin-top: 22px; color: var(--text-secondary); font-size: .78rem; text-align: center; text-decoration: none; }
+.login-fallback-link:hover { color: var(--link); }
+.login-dialog { position: fixed; margin: auto; width: min(440px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; }
+.login-dialog::backdrop { background: rgba(0, 0, 0, .45); backdrop-filter: blur(8px); }
+.login-dialog .section-eyebrow { padding-right: 25px; }
+.login-close { position: absolute; top: 14px; right: 14px; font-size: 1.5rem; }
+.modal-open { overflow: hidden; }
+.login-card .login-error { padding: 12px; border-radius: 11px; background: color-mix(in srgb, var(--danger) 10%, transparent); color: var(--danger); }
+
+/* Newsroom details: compact controls, readable long content and actions. */
+.dashboard-control input, .dashboard-control select, .dashboard-control textarea { font-size: .85rem; }
+.dashboard-control textarea { padding: 12px; }
+.dashboard-control select { text-overflow: ellipsis; }
+.dashboard-controls-panel { position: relative; z-index: 2; }
+.management-card, .dashboard-card-main, .user-identity, .user-identity > div { min-width: 0; }
+.management-card h2, .dashboard-article-card h2, .comment-card-header h2 { overflow-wrap: anywhere; }
+.management-card:hover { box-shadow: var(--shadow-small); }
+.comment-card-header a { color: var(--link); text-decoration: none; }
+.comment-card-header a:hover { text-decoration: underline; }
+.management-actions { flex-wrap: wrap; }
+.dashboard-pagination { flex-wrap: wrap; }
+.danger-action, .return-action { color: var(--danger); }
+.status-returned { color: var(--danger); }
+.status-published, .role-reporter, .review-live-pill { color: var(--success); }
+.writing-shell { max-width: 1080px; }
+.writing-card, .editor-notice, .writing-actions { padding: 22px; margin-bottom: 18px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface-solid); box-shadow: var(--shadow-small); }
+.writing-card-heading { margin-bottom: 22px; }
+.writing-card-heading h2 { margin: 0; font-size: 1.25rem; letter-spacing: -.025em; }
+.editor-notice { color: var(--text-secondary); font-size: .86rem; background: var(--surface); }
+.editor-notice strong { color: var(--text-primary); }
+.editor-notice p { margin: 6px 0 0; }
+.writing-actions { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.save-status { margin: 0; font-size: .82rem; color: var(--text-secondary); }
+#article-content, #editor-content { font-size: 1rem; line-height: 1.75; }
+#article-title { font-size: 1rem; }
+.review-content-preview { white-space: pre-wrap; overflow-wrap: anywhere; }
+.review-metadata, .review-main-actions { flex-wrap: wrap; }
+.review-section-heading > div { min-width: 0; }
+.editor-note-card { overflow-wrap: anywhere; }
+
+@media (max-width: 1050px) {
+    .dashboard-controls-panel { padding: 14px; }
+}
+@media (max-width: 700px) {
+    .article-shell { width: calc(100% - 24px); padding-top: 28px; }
+    .article-heading { margin-bottom: 24px; }
+    .article-summary { font-size: 1rem; }
+    .article-content { font-size: 1.06rem; line-height: 1.8; }
+    .article-heading h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
+    .writing-card, .writing-actions, .editor-notice, .management-panel, .management-card, .review-version-card, .review-action-card, .review-danger-zone { padding: 18px; }
+    .writing-actions { flex-direction: column; align-items: stretch; gap: 16px; }
+    .review-section-heading { flex-wrap: wrap; }
+    .dashboard-shell { width: calc(100% - 24px); }
+}
+@media (max-width: 560px) {
+    .feed-controls-panel { padding: 12px; }
+    .feed-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .feed-control-search { grid-column: 1 / -1; }
+    .feed-control:last-child { grid-column: 1 / -1; }
+    .feed-heading h1 { font-size: clamp(2.35rem, 10vw, 3.3rem); }
+    .news-card-content { padding: 18px; }
+    .article-metadata { gap: 8px 16px; }
+    .article-page .article-hero { border-radius: 16px; }
+    #comment-form { padding: 18px; }
+    .comment-form-footer { align-items: stretch; flex-direction: column; gap: 14px; }
+    .comment { padding: 18px; }
+    .login-shell { padding: 32px 12px; }
+    .login-card, .login-dialog { padding: 28px 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+.writing-shell .dashboard-page-heading > .status-pill { align-self: flex-start; }
+.writing-shell .editor-note-card { max-width: none; margin-bottom: 18px; padding: 18px 22px; border: 1px solid var(--border); border-radius: 16px; }
+@media (max-width: 560px) {
+    /* Keep mobile text entry readable without browser zooming the form. */
+    .site-field input, .site-field textarea,
+    .dashboard-control input, .dashboard-control textarea { font-size: 1rem; }
+}

@@ -30,6 +30,7 @@
         src="/js/editorReview.js"
         defer
     ></script>
+    <link rel="stylesheet" href="/css/site.css">
 </head>
 
 <body class="staff-page">
@@ -120,9 +121,7 @@
                             <%= article.publishedVersion.summary %>
                         </p>
 
-                        <div class="review-content-preview">
-                            <%= article.publishedVersion.content %>
-                        </div>
+                        <div class="review-content-preview"><%= article.publishedVersion.content %></div>
 
                     </div>
 
@@ -141,7 +140,7 @@
                         </span>
 
                         <h2>
-                            Submitted Content
+                            <%= article.status === "pending" ? "Submitted Content" : "Working Content" %>
                         </h2>
 
                     </div>
@@ -156,7 +155,7 @@
                             Title
                         </span>
 
-                        <input
+                        <input autocomplete="off"
                             id="editor-title"
                             type="text"
                             value="<%= article.workingVersion.title %>"
@@ -170,7 +169,7 @@
                             Category
                         </span>
 
-                        <input
+                        <input autocomplete="off"
                             id="editor-category"
                             type="text"
                             value="<%= article.workingVersion.category %>"
@@ -184,7 +183,7 @@
                             Image URL
                         </span>
 
-                        <input
+                        <input autocomplete="off"
                             id="editor-image"
                             type="url"
                             value="<%= article.workingVersion.imageUrl %>"
@@ -198,7 +197,7 @@
                             Summary
                         </span>
 
-                        <textarea
+                        <textarea autocomplete="off"
                             id="editor-summary"
                             class="editor-summary-field"
                         ><%= article.workingVersion.summary %></textarea>
@@ -211,7 +210,7 @@
                             Content
                         </span>
 
-                        <textarea
+                        <textarea autocomplete="off"
                             id="editor-content"
                             class="editor-content-field"
                         ><%= article.workingVersion.content %></textarea>
@@ -266,7 +265,7 @@
 
                         </div>
 
-                        <textarea
+                        <textarea autocomplete="off"
                             id="editor-note"
                             placeholder="Explain what needs to be changed..."
                         ></textarea>

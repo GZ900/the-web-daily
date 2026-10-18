@@ -30,6 +30,7 @@
         src="/js/adminComments.js"
         defer
     ></script>
+    <link rel="stylesheet" href="/css/site.css">
 </head>
 
 <body class="staff-page">
@@ -77,7 +78,7 @@
                         Search
                     </span>
 
-                    <input
+                    <input autocomplete="off"
                         type="search"
                         name="search"
                         value="<%= search %>"
@@ -214,7 +215,7 @@
                                 Reader Name
                             </span>
 
-                            <input
+                            <input autocomplete="off"
                                 class="comment-name"
                                 value="<%= comment.name %>"
                             >
@@ -227,7 +228,7 @@
                                 Comment
                             </span>
 
-                            <textarea
+                            <textarea autocomplete="off"
                                 class="comment-text"
                                 rows="4"
                             ><%= comment.text %></textarea>

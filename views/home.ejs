@@ -30,6 +30,7 @@
         src="/js/feed.js"
         defer
     ></script>
+    <link rel="stylesheet" href="/css/site.css">
 </head>
 
 <body class="home-page">
@@ -258,7 +259,7 @@
                             Category
                         </span>
 
-                        <select id="feed-category">
+                        <select id="feed-category" data-compact-select>
 
                             <option value="">
                                 All Categories
@@ -454,24 +455,7 @@
 
     </main>
 
-    <footer class="site-footer">
-
-        <div class="site-footer-inner">
-
-            <a
-                class="footer-brand"
-                href="/"
-            >
-                The Web Daily
-            </a>
-
-            <span>
-                © 2026
-            </span>
-
-        </div>
-
-    </footer>
+    <%- include("partials/siteFooter") %>
 
 </body>
 

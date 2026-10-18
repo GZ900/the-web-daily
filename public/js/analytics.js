@@ -2337,7 +2337,7 @@ if (
     function (event) {
       if (
         !event.target.closest(
-          ".analytics-custom-select"
+          ".analytics-custom-select:not(.site-select)"
         )
       ) {
         closeCustomMenus();

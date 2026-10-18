@@ -1,141 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <title><%= pageTitle %> | The Web Daily</title>
-
-    <link
-        rel="stylesheet"
-        href="/css/style.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/css/dashboard.css"
-    >
-
-    <script
-        src="/js/reporterEditor.js"
-        defer
-    ></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/site.css">
+    <script src="/js/reporterEditor.js" defer></script>
 </head>
-
-<body>
-
-    <%- include("../partials/staffHeader", {
-        staffRole: "reporter"
-    }) %>
-
-    <main>
-
-        <section
-            id="article-editor"
-            data-article-id="<%= article._id %>"
-        >
-
-            <h2>
-                Edit Article
-            </h2>
-
-            <p>
-                Status:
-                <strong>
-                    <%= article.status %>
-                </strong>
-            </p>
-
+<body class="staff-page">
+    <%- include("../partials/staffHeader", { staffRole: "reporter", activeSection: "dashboard" }) %>
+    <main class="dashboard-shell writing-shell">
+        <a class="back-link" href="/reporter">← Your stories</a>
+        <section id="article-editor" data-article-id="<%= article._id %>">
+            <header class="dashboard-page-heading">
+                <div>
+                    <span class="dashboard-eyebrow">REPORTER WORKSPACE</span>
+                    <h1>Edit your story.</h1>
+                    <p>Shape your next story. Your changes are saved automatically as you write.</p>
+                </div>
+                <span class="status-pill status-<%= article.status %>"><%= article.status %></span>
+            </header>
             <% if (article.publishedVersion) { %>
-
-                <p>
-                    This article already has a published version.
-                    Your changes will not become public until
-                    an editor approves them.
-                </p>
-
+                <aside class="editor-notice"><strong>A version of this story is live.</strong><p>Your changes stay private until an Editor approves the update.</p></aside>
             <% } %>
-
             <% if (article.editorNote) { %>
-
-                <p>
-                    <strong>
-                        Editor note:
-                    </strong>
-
-                    <%= article.editorNote %>
-                </p>
-
+                <aside class="editor-note-card"><strong>Editor feedback</strong><p><%= article.editorNote %></p></aside>
             <% } %>
-
-            <label>
-                Title
-
-                <input
-                    id="article-title"
-                    type="text"
-                    value="<%= article.workingVersion.title %>"
-                >
-            </label>
-
-            <label>
-                Summary
-
-                <textarea
-                    id="article-summary"
-                ><%= article.workingVersion.summary %></textarea>
-            </label>
-
-            <label>
-                Category
-
-                <input
-                    id="article-category"
-                    type="text"
-                    value="<%= article.workingVersion.category %>"
-                >
-            </label>
-
-            <label>
-                Image URL
-
-                <input
-                    id="article-image"
-                    type="url"
-                    value="<%= article.workingVersion.imageUrl %>"
-                >
-            </label>
-
-            <label>
-                Content
-
-                <textarea
-                    id="article-content"
-                ><%= article.workingVersion.content %></textarea>
-            </label>
-
-            <p id="save-status">
-                Ready
-            </p>
-
-            <button
-                type="button"
-                id="submit-review"
-            >
-                Submit for Review
-            </button>
-
-            <p id="submit-message"></p>
-
+            <section class="writing-card" aria-labelledby="story-details-heading">
+                <header class="writing-card-heading"><span class="dashboard-eyebrow">STORY DETAILS</span><h2 id="story-details-heading">The essentials</h2></header>
+                <div class="editor-form-grid">
+                    <label class="dashboard-control editor-field-wide" for="article-title"><span>Title</span><input autocomplete="off" id="article-title" type="text" value="<%= article.workingVersion.title %>"></label>
+                    <label class="dashboard-control editor-field-wide" for="article-summary"><span>Summary</span><textarea autocomplete="off" id="article-summary" class="editor-summary-field" rows="4"><%= article.workingVersion.summary %></textarea></label>
+                    <label class="dashboard-control" for="article-category"><span>Category</span><input autocomplete="off" id="article-category" type="text" value="<%= article.workingVersion.category %>"></label>
+                    <label class="dashboard-control" for="article-image"><span>Image URL</span><input autocomplete="off" id="article-image" type="url" value="<%= article.workingVersion.imageUrl %>"></label>
+                </div>
+            </section>
+            <section class="writing-card" aria-labelledby="story-body-heading">
+                <header class="writing-card-heading"><span class="dashboard-eyebrow">YOUR STORY</span><h2 id="story-body-heading">Make every word count.</h2></header>
+                <label class="dashboard-control" for="article-content"><span>Content</span><textarea autocomplete="off" id="article-content" class="editor-content-field" rows="18"><%= article.workingVersion.content %></textarea></label>
+            </section>
+            <section class="writing-actions" aria-label="Article actions">
+                <p id="save-status" class="save-status" role="status" aria-live="polite">Ready</p>
+                <button type="button" id="submit-review" class="primary-action">Submit for review</button>
+            </section>
+            <p id="submit-message" class="management-message" role="status" aria-live="polite"></p>
         </section>
-
     </main>
-
 </body>
-
 </html>

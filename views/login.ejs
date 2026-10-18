@@ -1,80 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <title><%= pageTitle %> | The Web Daily</title>
-
-    <link
-        rel="stylesheet"
-        href="/css/style.css"
-    >
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/site.css">
 </head>
-
-<body>
-
-    <header>
-        <h1>The Web Daily</h1>
-
-        <nav>
-            <a href="/">Home</a>
-        </nav>
-    </header>
-
-    <main>
-
-        <section class="login-page">
-
-            <h2>Staff Login</h2>
-
+<body data-login-page>
+    <%- include("partials/staffHeader") %>
+    <main class="login-shell">
+        <section class="login-card" aria-labelledby="login-title">
+            <span class="section-eyebrow">YOUR NEWSROOM</span>
+            <h1 id="login-title">Welcome back.</h1>
+            <p>Log in to your Reporter or Editor workspace.</p>
             <% if (errorMessage) { %>
-
-                <p>
-                    <%= errorMessage %>
-                </p>
-
+                <p class="login-error" role="alert"><%= errorMessage %></p>
             <% } %>
-
-            <form method="POST" action="/login">
-
-                <label>
-                    Username
-
-                    <input
-                        type="text"
-                        name="username"
-                        required
-                        autocomplete="username"
-                    >
-                </label>
-
-                <label>
-                    Password
-
-                    <input
-                        type="password"
-                        name="password"
-                        required
-                        autocomplete="current-password"
-                    >
-                </label>
-
-                <button type="submit">
-                    Login
-                </button>
-
+            <form class="login-form" method="POST" action="/login">
+                <%- include("partials/loginFields", { fieldPrefix: "page" }) %>
             </form>
-
+            <a class="login-fallback-link" href="/">Back to the latest stories</a>
         </section>
-
     </main>
-
+    <%- include("partials/siteFooter") %>
 </body>
-
 </html>
