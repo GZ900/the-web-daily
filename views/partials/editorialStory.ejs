@@ -1,0 +1,30 @@
+<%
+    const story = article.publishedVersion;
+    const imageUrl = /^(https?:\/\/|\/(?!\/))/i.test((story.imageUrl || '').trim()) ? story.imageUrl.trim() : '';
+    const showImage = Boolean(imageUrl);
+    const isLead = variant === 'lead';
+    const priorityImage = isLead || variant === 'secondary';
+    const date = article.publishedAt ? new Date(article.publishedAt) : null;
+%>
+<article class="editorial-story story-<%= variant %> <%= showImage ? 'story-has-image' : 'story-no-image' %>">
+    <% if (showImage) { %>
+        <a class="story-media" href="/articles/<%= article._id %>" tabindex="-1" aria-hidden="true">
+            <img src="<%= imageUrl %>" alt="" width="720" height="450" loading="<%= priorityImage ? 'eager' : 'lazy' %>" <%- isLead ? 'fetchpriority="high"' : '' %>>
+        </a>
+    <% } %>
+    <div class="story-copy">
+        <a class="story-category" href="/?category=<%= encodeURIComponent(story.category) %>#all-stories" data-feed-category="<%= story.category %>"><%= story.category || 'News' %></a>
+        <% if (isLead) { %>
+            <h2 class="story-title"><a href="/articles/<%= article._id %>"><%= story.title %></a></h2>
+        <% } else { %>
+            <h3 class="story-title"><a href="/articles/<%= article._id %>"><%= story.title %></a></h3>
+        <% } %>
+        <% if (story.summary) { %><p class="story-summary"><%= story.summary %></p><% } %>
+        <div class="story-byline">
+            <span>By <%= article.author?.displayName || 'Unknown' %></span>
+            <% if (date && !Number.isNaN(date.getTime())) { %>
+                <time datetime="<%= date.toISOString() %>"><%= date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Jerusalem' }) %></time>
+            <% } %>
+        </div>
+    </div>
+</article>

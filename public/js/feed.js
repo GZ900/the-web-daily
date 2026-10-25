@@ -53,6 +53,8 @@ if (
       ".news-card"
     ).length >= 20;
 
+  let activeRequest = null;
+
   let searchTimer =
     null;
 
@@ -244,7 +246,7 @@ if (
     window.history.replaceState(
       null,
       "",
-      newUrl
+      newUrl + window.location.hash
     );
   }
 
@@ -414,7 +416,7 @@ if (
 
     const heading =
       document.createElement(
-        "h2"
+        "h3"
       );
 
     heading.className =
@@ -527,7 +529,7 @@ if (
   async function loadPage({
     reset = false
   } = {}) {
-    if (loading) {
+    if (loading && !reset) {
       return;
     }
 
@@ -538,8 +540,13 @@ if (
       return;
     }
 
+    if (reset) activeRequest?.abort();
+    const request = new AbortController();
+    activeRequest = request;
+
     loading =
       true;
+    feed.setAttribute("aria-busy", "true");
 
     if (reset) {
       currentPage =
@@ -547,9 +554,6 @@ if (
 
       hasMore =
         true;
-
-      feed.innerHTML =
-        "";
     }
 
     feedMessage.textContent =
@@ -560,11 +564,14 @@ if (
         await fetch(
           buildUrl(
             currentPage
-          )
+          ),
+          { signal: request.signal }
         );
 
       const data =
         await response.json();
+
+      if (request !== activeRequest) return;
 
       if (!response.ok) {
         feedMessage.textContent =
@@ -573,6 +580,8 @@ if (
 
         return;
       }
+
+      if (reset) feed.replaceChildren();
 
       data.articles.forEach(
         article => {
@@ -603,7 +612,10 @@ if (
 
       currentPage +=
         1;
+
+      document.dispatchEvent(new CustomEvent("feed:updated", { detail: { reset } }));
     } catch (error) {
+      if (error.name === "AbortError") return;
       console.error(
         "Feed request error:",
         error
@@ -612,8 +624,10 @@ if (
       feedMessage.textContent =
         "Unable to connect to the server";
     } finally {
-      loading =
-        false;
+      if (request === activeRequest) {
+        loading = false;
+        feed.setAttribute("aria-busy", "false");
+      }
     }
   }
 

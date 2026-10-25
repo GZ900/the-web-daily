@@ -1,0 +1,14 @@
+<aside class="utility-weather" aria-label="Weather">
+    <% if (weather) { %>
+        <span class="utility-weather-current"><strong><%= weather.location %></strong> <span><%= weather.description %></span> <b><%= Math.round(weather.temperature) %>°C</b></span>
+        <dl class="utility-weather-details">
+            <div><dt>Feels</dt><dd><%= Math.round(weather.apparentTemperature) %>°</dd></div>
+            <div><dt>Humidity</dt><dd><%= weather.humidity %>%</dd></div>
+            <div><dt>Wind</dt><dd><%= Math.round(weather.windSpeed) %> km/h</dd></div>
+        </dl>
+        <a class="weather-credit" href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" aria-label="Weather by Open-Meteo">Open-Meteo ↗</a>
+        <% if (weather.stale) { %><span class="weather-stale">Most recent available weather</span><% } %>
+    <% } else { %>
+        <span>Weather temporarily unavailable</span>
+    <% } %>
+</aside>

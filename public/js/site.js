@@ -28,7 +28,7 @@
   }
 
   // Native selects remain the source of truth and the submitted form fields.
-  document.querySelectorAll("select:not(.analytics-data-select)").forEach((select, index) => {
+  document.querySelectorAll("select:not(.analytics-data-select):not([data-topic-state])").forEach((select, index) => {
     const label = select.closest("label");
     const fieldName = label?.querySelector("span")?.textContent.trim() || select.getAttribute("aria-label") || "Choice";
     // A popup contains several buttons, so it must not sit inside a form label.

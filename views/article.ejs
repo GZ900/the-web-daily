@@ -7,12 +7,14 @@
     <title><%= pageTitle %> | The Web Daily</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/editorial.css">
+    <script src="/js/editorial.js" defer></script>
     <script src="/js/article.js" defer></script>
 </head>
 <body class="public-article-page">
     <%- include("partials/staffHeader") %>
     <main class="article-shell">
-        <a class="back-link" href="/">← All stories</a>
+        <nav class="article-breadcrumb" aria-label="Article navigation"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/?category=<%= encodeURIComponent(article.publishedVersion.category) %>#all-stories"><%= article.publishedVersion.category %></a></nav>
         <article class="article-page" data-article-id="<%= article._id %>">
             <header class="article-heading">
                 <span class="section-eyebrow"><%= article.publishedVersion.category %></span>

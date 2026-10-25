@@ -1,205 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <meta
-        name="color-scheme"
-        content="light dark"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="The latest stories in technology, business, culture and more from The Web Daily newsroom.">
     <title><%= pageTitle %></title>
-
-    <link
-        rel="stylesheet"
-        href="/css/style.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="/css/weather.css"
-    >
-
-    <script
-        src="/js/feed.js"
-        defer
-    ></script>
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/editorial.css">
+    <script src="/js/feed.js" defer></script>
+    <script src="/js/editorial.js" defer></script>
 </head>
-
 <body class="home-page">
-
-    <%- include("partials/staffHeader", {
-        activeSection: "home"
-    }) %>
-
-    <main class="home-shell">
-
-        <header class="feed-heading">
-
-            <span class="section-eyebrow">
-                THE WEB DAILY
-            </span>
-
-            <h1 id="latest-news-heading">
-                News for the
-                digital world.
-            </h1>
-
-            <p class="feed-introduction">
-                The latest stories from our
-                newsroom, organised in one
-                clean and simple place.
-            </p>
-
-        </header>
-
-        <section
-            class="weather-widget"
-            aria-label="Weather"
-        >
-
-            <% if (weather) { %>
-
-                <div class="weather-location-block">
-
-                    <div class="weather-live-row">
-
-                        <span
-                            class="weather-status-dot"
-                            aria-hidden="true"
-                        ></span>
-
-                        <span class="weather-kicker">
-                            Live Weather
-                        </span>
-
-                    </div>
-
-                    <h2>
-                        <%= weather.location %>
-                    </h2>
-
-                    <p class="weather-description">
-                        <%= weather.description %>
-                    </p>
-
-                </div>
-
-                <div class="weather-current">
-
-                    <span class="weather-temperature">
-                        <%= Math.round(weather.temperature) %>°
-                    </span>
-
-                    <span class="weather-unit">
-                        C
-                    </span>
-
-                </div>
-
-                <dl class="weather-details">
-
-                    <div>
-
-                        <dt>
-                            Feels like
-                        </dt>
-
-                        <dd>
-                            <%= Math.round(weather.apparentTemperature) %>°
-                        </dd>
-
-                    </div>
-
-                    <div>
-
-                        <dt>
-                            Humidity
-                        </dt>
-
-                        <dd>
-                            <%= weather.humidity %>%
-                        </dd>
-
-                    </div>
-
-                    <div>
-
-                        <dt>
-                            Wind
-                        </dt>
-
-                        <dd>
-                            <%= Math.round(weather.windSpeed) %>
-                            km/h
-                        </dd>
-
-                    </div>
-
-                    <div>
-
-                        <dt>
-                            Rain
-                        </dt>
-
-                        <dd>
-                            <%= weather.precipitation %>
-                            mm
-                        </dd>
-
-                    </div>
-
-                </dl>
-
-                <div class="weather-footer">
-
-                    <% if (weather.stale) { %>
-
-                        <span class="weather-warning">
-                            Showing the most recent available data.
-                        </span>
-
+    <a class="editorial-skip" href="#top-stories">Skip to the news</a>
+    <%- include("partials/staffHeader", { activeSection: "home" }) %>
+    <div class="public-topic-bar">
+        <%- include("partials/topicNavigation", { topics, archive: false }) %>
+    </div>
+    <main class="home-shell editorial-home">
+        <div class="edition-utilities">
+            <p class="edition-date"><%= new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jerusalem' }) %></p>
+            <%- include("partials/compactWeather", { weather }) %>
+        </div>
+        <% if (popularArticles.length) { %>
+            <section class="most-read" aria-labelledby="most-read-heading" id="most-read">
+                <h2 id="most-read-heading">Most<br>Read <span aria-hidden="true">↗</span></h2>
+                <ol>
+                    <% popularArticles.forEach((article, index) => { %>
+                        <li><span class="most-read-rank" aria-hidden="true"><%= String(index + 1).padStart(2, '0') %></span><a href="/articles/<%= article._id %>"><%= article.publishedVersion.title %></a></li>
+                    <% }) %>
+                </ol>
+            </section>
+        <% } %>
+        <section class="top-stories" id="top-stories" aria-labelledby="top-stories-heading">
+            <header class="editorial-section-heading">
+                <h1 id="top-stories-heading" tabindex="-1">Top Stories<span class="editorial-period">.</span></h1>
+                <span class="editorial-section-note">The latest from our newsroom</span>
+            </header>
+            <% if (topStories.length) { %>
+                <div class="top-stories-grid">
+                    <%- include("partials/editorialStory", { article: topStories[0], variant: 'lead' }) %>
+                    <% if (topStories.length > 1) { %>
+                        <div class="secondary-stories">
+                            <% topStories.slice(1).forEach((article, index) => { %>
+                                <%- include("partials/editorialStory", { article, variant: index === 0 ? 'secondary' : 'compact' }) %>
+                            <% }) %>
+                        </div>
                     <% } %>
-
-                    <span class="weather-source">
-
-                        Powered by
-
-                        <a
-                            href="https://open-meteo.com/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Open-Meteo
-                        </a>
-
-                    </span>
-
                 </div>
-
-            <% } else { %>
-
-                <p class="weather-unavailable">
-                    Weather information is
-                    temporarily unavailable.
-                </p>
-
-            <% } %>
-
+            <% } else { %><p class="editorial-empty">The newsroom is quiet for now. Check back for new stories.</p><% } %>
         </section>
-
+        <div class="category-sections">
+            <% categorySections.forEach((section, index) => {
+                const layout = section.category.toLowerCase();
+                const stories = section.articles;
+                const renderStory = (article, variant) => include("partials/editorialStory", { article, variant });
+            %>
+                <section class="topic-section topic-<%= layout %>" aria-labelledby="topic-section-<%= index %>">
+                    <header class="editorial-section-heading">
+                        <h2 id="topic-section-<%= index %>"><a href="/?category=<%= encodeURIComponent(section.category) %>#all-stories" data-feed-category="<%= section.category %>"><%= section.category %></a></h2>
+                        <a class="section-view-all" href="/?category=<%= encodeURIComponent(section.category) %>#all-stories" data-feed-category="<%= section.category %>" aria-label="View all <%= section.category %> stories">View all <span aria-hidden="true">→</span></a>
+                    </header>
+                    <div class="topic-story-grid">
+                        <% if (layout === 'technology') { %>
+                            <% if (stories[0]) { %><div class="topic-primary"><%- renderStory(stories[0], 'feature') %></div><% } %>
+                            <% if (stories[1]) { %><div class="topic-secondary"><%- renderStory(stories[1], 'tile') %></div><% } %>
+                            <% if (stories.length > 2) { %><div class="topic-story-stack">
+                                <% stories.slice(2).forEach(article => { %><%- renderStory(article, 'compact') %><% }) %>
+                            </div><% } %>
+                        <% } else if (layout === 'business') { %>
+                            <% stories.slice(0, 2).forEach(article => { %><div class="topic-prominent"><%- renderStory(article, 'tile') %></div><% }) %>
+                            <% [stories.slice(2, 4), stories.slice(4, 6)].filter(group => group.length).forEach(group => { %>
+                                <div class="topic-story-stack"><% group.forEach(article => { %><%- renderStory(article, 'compact') %><% }) %></div>
+                            <% }) %>
+                        <% } else if (layout === 'world' || layout === 'science') { %>
+                            <% if (stories.length) { %><div class="topic-main">
+                                <%- renderStory(stories[0], 'feature') %>
+                                <% if (stories[1]) { %><%- renderStory(stories[1], 'related') %><% } %>
+                            </div><% } %>
+                            <% if (stories.length > 2) { %><div class="topic-story-stack">
+                                <% stories.slice(2).forEach(article => { %><%- renderStory(article, 'compact') %><% }) %>
+                            </div><% } %>
+                        <% } else { %>
+                            <% stories.forEach((article, storyIndex) => { %>
+                                <%- renderStory(article, storyIndex < 2 ? 'tile' : 'compact') %>
+                            <% }) %>
+                        <% } %>
+                    </div>
+                </section>
+            <% }) %>
+        </div>
         <section
-            class="feed-column"
-            aria-labelledby="latest-news-heading"
+            class="feed-column" id="all-stories"
+            aria-labelledby="all-stories-heading"
         >
 
+            <header class="editorial-section-heading archive-heading">
+                <div><span class="editorial-kicker">KEEP EXPLORING</span><h2 id="all-stories-heading" tabindex="-1">All Stories</h2></div>
+                <p id="feed-context">The complete newsroom archive.</p>
+            </header>
+            <%- include("partials/topicNavigation", { topics, archive: true }) %>
             <section
                 class="feed-controls-panel"
                 aria-label="News controls"
@@ -251,7 +152,7 @@
                     </label>
 
                     <label
-                        class="feed-control"
+                        class="feed-control feed-category-fallback"
                         for="feed-category"
                     >
 
@@ -259,7 +160,7 @@
                             Category
                         </span>
 
-                        <select id="feed-category" data-compact-select>
+                        <select id="feed-category" data-topic-state>
 
                             <option value="">
                                 All Categories
@@ -389,7 +290,7 @@
 
                             </div>
 
-                            <h2 class="news-card-title">
+                            <h3 class="news-card-title">
 
                                 <a
                                     href="/articles/<%= article._id %>"
@@ -397,7 +298,7 @@
                                     <%= article.publishedVersion.title %>
                                 </a>
 
-                            </h2>
+                            </h3>
 
                             <p class="news-card-summary">
                                 <%= article.publishedVersion.summary %>
@@ -454,9 +355,9 @@
         </section>
 
     </main>
-
+    <button class="smart-scroll" id="smart-scroll" type="button" aria-label="Back to top" title="Back to top" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 14 6-6 6 6"></path></svg>
+    </button>
     <%- include("partials/siteFooter") %>
-
 </body>
-
 </html>

@@ -1,0 +1,13 @@
+<nav class="topic-navigation <%= archive ? 'archive-topics' : 'header-topics' %>" aria-label="<%= archive ? 'Filter stories by topic' : 'Topics' %>" <%- archive ? 'id="archive-topics"' : '' %>>
+    <% if (archive) { %>
+        <a href="/#all-stories" data-feed-category="" aria-controls="news-feed" aria-current="true">All</a>
+    <% } else { %>
+        <a href="/" class="topic-home">Home</a>
+    <% } %>
+    <% (archive ? topics : topics.slice(0, 6)).forEach(category => { %>
+        <a href="/?category=<%= encodeURIComponent(category) %>#all-stories" data-feed-category="<%= category %>" aria-controls="news-feed"><%= category %></a>
+    <% }) %>
+    <% if (!archive) { %>
+        <a href="#archive-topics" class="topic-more">All topics <span aria-hidden="true">↗</span></a>
+    <% } %>
+</nav>
