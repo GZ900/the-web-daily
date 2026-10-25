@@ -14,7 +14,7 @@
     <%- include("../partials/staffHeader", { staffRole: "reporter", activeSection: "dashboard" }) %>
     <main class="dashboard-shell writing-shell">
         <a class="back-link" href="/reporter">← Your stories</a>
-        <section id="article-editor" data-article-id="<%= article._id %>">
+        <section id="article-editor" data-article-id="<%= article._id %>" data-save-revision="<%= article.__v || 0 %>" data-save-client="<%= article.autosaveClient || '' %>" data-save-sequence="<%= article.autosaveSequence || 0 %>">
             <header class="dashboard-page-heading">
                 <div>
                     <span class="dashboard-eyebrow">REPORTER WORKSPACE</span>

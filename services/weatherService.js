@@ -1,6 +1,8 @@
 const CACHE_DURATION_MS =
   15 * 60 * 1000;
 
+const PROVIDER_TIMEOUT_MS = 5000;
+
 const LOCATION = {
   name: "Tel Aviv",
   latitude: 32.0853,
@@ -73,14 +75,15 @@ async function fetchWeatherFromService() {
         "wind_speed_10m"
       ].join(","),
 
-      timezone: "Asia/Jerusalem"
+      timezone: "Asia/Jerusalem",
+      timeformat: "unixtime"
     });
 
   const url =
     `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
 
   const response =
-    await fetch(url);
+    await fetch(url, { signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS) });
 
   if (!response.ok) {
     throw new Error(
@@ -95,6 +98,13 @@ async function fetchWeatherFromService() {
     throw new Error(
       "Weather service returned no current weather data"
     );
+  }
+
+  const observedAt = Number(data.current.time) * 1000;
+  const fetchedAt = Date.now();
+  if (!Number.isFinite(observedAt) || observedAt > fetchedAt ||
+      fetchedAt - observedAt > CACHE_DURATION_MS) {
+    throw new Error("Weather observation is outside the fifteen-minute freshness limit");
   }
 
   const weather = {
@@ -124,7 +134,7 @@ async function fetchWeatherFromService() {
       ),
 
     weatherTime:
-      data.current.time,
+      new Date(observedAt).toISOString(),
 
     fetchedAt:
       new Date(),
@@ -135,8 +145,7 @@ async function fetchWeatherFromService() {
   cachedWeather = weather;
 
   cacheExpiresAt =
-    Date.now() +
-    CACHE_DURATION_MS;
+    Math.min(fetchedAt, observedAt) + CACHE_DURATION_MS;
 
   console.log(
     "Weather cache refreshed from Open-Meteo"
@@ -157,28 +166,15 @@ async function getWeather() {
     return pendingRequest;
   }
 
-  pendingRequest =
-    fetchWeatherFromService();
-
-  try {
-    return await pendingRequest;
-  } catch (error) {
-    console.error(
-      "Weather service error:",
-      error.message
-    );
-
-    if (cachedWeather) {
-      return {
-        ...cachedWeather,
-        stale: true
-      };
-    }
-
-    return null;
-  } finally {
-    pendingRequest = null;
-  }
+  // Store the handled promise so all concurrent callers receive the same
+  // unavailable result on failure, rather than an unhandled rejection.
+  pendingRequest = fetchWeatherFromService()
+    .catch(error => {
+      console.error("Weather service error:", error.message);
+      return null;
+    })
+    .finally(() => { pendingRequest = null; });
+  return pendingRequest;
 }
 
 module.exports = {

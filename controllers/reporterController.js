@@ -542,6 +542,13 @@ async function autosaveArticle(
         });
     }
 
+    const save = req.body.autosave;
+    if (!save || !/^[a-zA-Z0-9-]{36}$/.test(save.clientId || "") ||
+        !Number.isSafeInteger(save.sequence) || save.sequence < 1 ||
+        !Number.isSafeInteger(save.revision) || save.revision < 0) {
+      return res.status(400).json({ message: "Invalid autosave version. Reload the editor." });
+    }
+
     const input =
       getArticleInput(
         req.body
@@ -570,7 +577,7 @@ async function autosaveArticle(
           req.user._id
       })
         .select(
-          "_id status"
+          "_id status autosaveClient autosaveSequence __v updatedAt"
         )
         .lean();
 
@@ -595,6 +602,13 @@ async function autosaveArticle(
         });
     }
 
+    // A reload may retry its unacknowledged exit save after MongoDB accepted it.
+    if (existingArticle.autosaveClient === save.clientId &&
+        existingArticle.autosaveSequence === save.sequence) {
+      return res.json({ message: "Saved", savedAt: existingArticle.updatedAt,
+        revision: existingArticle.__v });
+    }
+
     const sourceStatus =
       existingArticle.status;
 
@@ -614,16 +628,27 @@ async function autosaveArticle(
             req.user._id,
 
           status:
-            sourceStatus
+            sourceStatus,
+
+          // A new page must match the version it loaded. Within a page,
+          // only increasing sequences may win (exit saves can overtake fetch).
+          $or: [
+            { __v: save.revision, autosaveClient: { $ne: save.clientId } },
+            { autosaveClient: save.clientId, autosaveSequence: { $lt: save.sequence } }
+          ]
         },
         {
           $set: {
             workingVersion:
               input,
 
+            autosaveClient: save.clientId,
+            autosaveSequence: save.sequence,
+
             status:
               nextStatus
-          }
+          },
+          $inc: { __v: 1 }
         },
         {
           new: true,
@@ -631,7 +656,7 @@ async function autosaveArticle(
         }
       )
         .select(
-          "_id status updatedAt"
+          "_id status updatedAt __v"
         )
         .lean();
 
@@ -640,7 +665,7 @@ async function autosaveArticle(
         .status(409)
         .json({
           message:
-            "Article state changed before the save completed. Please try again."
+            "A newer save or workflow change exists. Reload the editor before continuing."
         });
     }
 
@@ -649,7 +674,9 @@ async function autosaveArticle(
         "Saved",
 
       savedAt:
-        updatedArticle.updatedAt
+        updatedArticle.updatedAt,
+
+      revision: updatedArticle.__v
     });
   } catch (error) {
     return handleApiError(

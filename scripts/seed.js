@@ -23,7 +23,7 @@ const {
 );
 
 const DB_URL =
-  "mongodb://127.0.0.1:27017/the-web-daily";
+  process.env.MONGODB_URI;
 
 const ARTICLE_COUNT = 520;
 
@@ -1295,9 +1295,19 @@ async function insertInChunks(
 
 async function seed() {
   try {
-    await mongoose.connect(
-      DB_URL
-    );
+    // Refuse to connect or delete anything until the caller explicitly names
+    // the same target twice. There is intentionally no default seed database.
+    if (!DB_URL) throw new Error("Set MONGODB_URI and SEED_CONFIRM_DATABASE explicitly.");
+    const parsed = new URL(DB_URL);
+    const databaseName = decodeURIComponent(parsed.pathname.slice(1));
+    if (!["mongodb:", "mongodb+srv:"].includes(parsed.protocol) ||
+        !databaseName || databaseName.includes("/") ||
+        ["admin", "local", "config"].includes(databaseName) ||
+        process.env.SEED_CONFIRM_DATABASE !== databaseName) {
+      throw new Error("Seed refused: SEED_CONFIRM_DATABASE must exactly match the URI database name.");
+    }
+    console.log(`Seed target database: ${databaseName} (all existing demo data will be replaced)`);
+    await mongoose.connect(DB_URL);
 
     console.log(
       "Connected to MongoDB"
@@ -1727,7 +1737,7 @@ async function seed() {
   } catch (error) {
     console.error(
       "Seed failed:",
-      error
+      error.message
     );
 
     process.exitCode = 1;

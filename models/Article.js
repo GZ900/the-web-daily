@@ -90,6 +90,10 @@ const articleSchema =
         default: "draft"
       },
 
+      // Order autosaves from one editor page, including its final exit save.
+      autosaveClient: { type: String, default: "" },
+      autosaveSequence: { type: Number, default: 0 },
+
       workingVersion: {
         type:
           articleVersionSchema,

@@ -121,7 +121,9 @@ async function getArticle(
             }
           },
           {
-            new: true
+            new: true,
+            // Reader traffic must not change editorial concurrency metadata.
+            timestamps: false
           }
         )
         .populate(
